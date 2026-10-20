@@ -1,12 +1,21 @@
 .hero {
   position: relative;
   width: 100%;
-  /* 80% of the viewport height; svh avoids the jump when mobile browser bars show/hide */
-  height: 80vh;
-  height: 80svh;
+  /* Desktop: 90% of the viewport height */
+  height: 90vh;
+  height: 90svh;
   min-height: 420px;
   overflow: hidden;
   background: var(--color-ink);
+}
+
+/* Mobile (matches the 768px video breakpoint): full screen.
+   svh avoids the jump when mobile browser bars show/hide */
+@media (max-width: 767px) {
+  .hero {
+    height: 100vh;
+    height: 100svh;
+  }
 }
 
 .video {
