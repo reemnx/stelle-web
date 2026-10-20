@@ -26,18 +26,28 @@ type Placed = { eyelet: number; charmId: string }
 
 type Drag = {
   charm: Charm
+  /** Eyelet the charm is being moved from, or null when dragged in from a card */
+  from: number | null
   pointerId: number
   startX: number
   startY: number
+  lastX: number
+  lastY: number
   active: boolean
   ghost: HTMLImageElement | null
   moveX: ((v: number) => void) | null
   moveY: ((v: number) => void) | null
+  /** Offset from the pointer to the charm's eyelet point, so it doesn't jump under the finger */
+  offX: number
+  offY: number
   target: number | null
+  timer: number | null
 }
 
 const STORAGE_KEY = 'stelle-sky'
 const SNAP_RADIUS = 70 // px on screen: how close a drop must be to an eyelet
+const LONG_PRESS_MS = 350 // hold time before a charm on the bag lifts off (touch)
+const MOVE_THRESHOLD = 6 // px of movement that starts a mouse drag
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
 
@@ -95,6 +105,7 @@ export function CharmBuilder({
   const [placed, setPlaced] = useState<Placed[]>([])
   const [dragging, setDragging] = useState(false)
   const [dropTarget, setDropTarget] = useState<number | null>(null)
+  const [movingFrom, setMovingFrom] = useState<number | null>(null)
   const [status, setStatus] = useState('')
 
   const sectionRef = useRef<HTMLElement>(null)
@@ -104,34 +115,14 @@ export function CharmBuilder({
   const justPlaced = useRef<number | null>(null)
   const removing = useRef(new Set<number>())
   const drag = useRef<Drag | null>(null)
-  const suppressClick = useRef(false)
+  /** Ignore the click that follows a drag (until this time) */
+  const suppressClickUntil = useRef(0)
   const loaded = useRef(false)
   /** Eyelets a charm is currently flying to (not yet in state) */
   const reserved = useRef(new Set<number>())
-  const prevCount = useRef(0)
 
   const charmById = useMemo(() => new Map(charms.map((c) => [c.id, c])), [charms])
   const taken = useMemo(() => new Set(placed.map((p) => p.eyelet)), [placed])
-
-  /** Constellation lines: each charm links to the nearest charm placed before it */
-  const links = useMemo(
-    () =>
-      placed.slice(1).map((p, k) => {
-        const [x, y] = eyelets[p.eyelet]
-        let best = placed[0].eyelet
-        let bestD = Infinity
-        for (const q of placed.slice(0, k + 1)) {
-          const [qx, qy] = eyelets[q.eyelet]
-          const d = Math.hypot(qx - x, qy - y)
-          if (d < bestD) {
-            bestD = d
-            best = q.eyelet
-          }
-        }
-        return { from: best, to: p.eyelet }
-      }),
-    [placed, eyelets],
-  )
 
   /* ----- restore a shared link or the last design on this device ----- */
   useEffect(() => {
@@ -181,20 +172,6 @@ export function CharmBuilder({
       tl.progress(1).kill() // never leave a charm half-turned
     }
   }, [placed, reducedMotion])
-
-  /* ----- new constellation line draws itself in ----- */
-  useLayoutEffect(() => {
-    const grew = placed.length > prevCount.current
-    prevCount.current = placed.length
-    if (!grew || reducedMotion || placed.length < 2) return
-    const line = layerRef.current?.querySelector<SVGLineElement>(`[data-line="${placed.length - 1}"]`)
-    if (!line) return
-    const len = Math.hypot(Number(line.getAttribute('x2')) - Number(line.getAttribute('x1')), Number(line.getAttribute('y2')) - Number(line.getAttribute('y1')))
-    const tw = gsap.fromTo(line, { strokeDasharray: len, strokeDashoffset: len }, { strokeDashoffset: 0, duration: 0.6, delay: 0.35, ease: 'power2.out' })
-    return () => {
-      tw.progress(1).kill()
-    }
-  }, [placed.length, reducedMotion])
 
   /* ----- cards drift in the first time the section is seen ----- */
   useEffect(() => {
@@ -256,11 +233,10 @@ export function CharmBuilder({
       .to(ghost, { y: to.y, duration: 0.65, ease: 'back.in(1.2)' }, 0) // the slight dip gives an arc
   }
 
+  const clickSuppressed = () => performance.now() < suppressClickUntil.current
+
   const addCharm = (charm: Charm) => {
-    if (suppressClick.current) {
-      suppressClick.current = false
-      return
-    }
+    if (clickSuppressed()) return
     const eyelet = nextFreeEyelet(charm.kind)
     if (eyelet === null) {
       setStatus('All 16 eyelets are full. Tap a charm on the bag to take it off.')
@@ -271,7 +247,7 @@ export function CharmBuilder({
   }
 
   const removeAt = (eyelet: number) => {
-    if (removing.current.has(eyelet)) return
+    if (clickSuppressed() || removing.current.has(eyelet)) return
     const el = pieceRefs.current.get(eyelet)
     const name = charmById.get(placed.find((p) => p.eyelet === eyelet)?.charmId ?? '')?.name
     const drop = () => {
@@ -304,12 +280,15 @@ export function CharmBuilder({
     }
   }
 
-  /* ----- drag & drop (mouse / pen; touch uses tap-to-add so the page still scrolls) ----- */
-  const nearestFreeEyelet = (x: number, y: number) => {
+  /* ----- drag & drop -----
+   * Cards: drag with a mouse/pen (on touch screens a tap adds, so the page keeps scrolling).
+   * Charms on the bag: long-press (touch or mouse) or just drag (mouse) to move to another eyelet.
+   */
+  const nearestFreeEyelet = (x: number, y: number, allow: number | null) => {
     let best: number | null = null
     let bestD = SNAP_RADIUS
     for (let i = 0; i < eyelets.length; i++) {
-      if (!isFree(i)) continue
+      if (!isFree(i) && i !== allow) continue
       const p = eyeletOnScreen(i)
       if (!p) continue
       const d = Math.hypot(p.x - x, p.y - y)
@@ -321,79 +300,176 @@ export function CharmBuilder({
     return best
   }
 
-  const onCardPointerDown = (e: ReactPointerEvent<HTMLButtonElement>, charm: Charm) => {
-    if (e.pointerType === 'touch' || e.button !== 0) return
-    drag.current = { charm, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, active: false, ghost: null, moveX: null, moveY: null, target: null }
+  const activateDrag = (d: Drag) => {
+    d.active = true
+    setDragging(true)
+    const scale = eyeletOnScreen(0)?.scale ?? 0.4
+    let x = d.lastX
+    let y = d.lastY
+    if (d.from !== null) {
+      // Lift the charm from its eyelet: start exactly where it sits
+      const at = eyeletOnScreen(d.from)
+      if (at) {
+        d.offX = at.x - d.lastX
+        d.offY = at.y - d.lastY
+        x = at.x
+        y = at.y
+      }
+      setMovingFrom(d.from)
+      const piece = pieceRefs.current.get(d.from)
+      if (piece) gsap.set(piece, { opacity: 0 })
+      navigator.vibrate?.(12)
+    }
+    d.ghost = makeGhost(d.charm, x, y, d.charm.onBag.w * scale)
+    d.ghost.classList.add(styles.ghostLifted)
+    if (!reducedMotion) gsap.fromTo(d.ghost, { scale: 1 }, { scale: 1.18, duration: 0.2, ease: 'power2.out' })
+    d.moveX = gsap.quickTo(d.ghost, 'x', { duration: 0.16, ease: 'power3' })
+    d.moveY = gsap.quickTo(d.ghost, 'y', { duration: 0.16, ease: 'power3' })
+  }
+
+  const startDrag = (e: ReactPointerEvent<HTMLElement>, charm: Charm, from: number | null) => {
+    if (e.button !== 0 || drag.current) return
+    const isTouch = e.pointerType === 'touch'
+    if (from === null && isTouch) return // cards: tap to add on touch screens
+    const d: Drag = {
+      charm,
+      from,
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      lastX: e.clientX,
+      lastY: e.clientY,
+      active: false,
+      ghost: null,
+      moveX: null,
+      moveY: null,
+      offX: 0,
+      offY: 0,
+      target: from,
+      timer: null,
+    }
+    drag.current = d
+    if (from !== null) {
+      // long press lifts a charm off the bag
+      d.timer = window.setTimeout(() => {
+        d.timer = null
+        if (drag.current === d && !d.active) activateDrag(d)
+      }, LONG_PRESS_MS)
+    }
+
+    const cleanup = () => {
+      if (d.timer !== null) window.clearTimeout(d.timer)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onCancel)
+      drag.current = null
+    }
 
     const onMove = (ev: PointerEvent) => {
-      const d = drag.current
-      if (!d || ev.pointerId !== d.pointerId) return
+      if (ev.pointerId !== d.pointerId) return
+      d.lastX = ev.clientX
+      d.lastY = ev.clientY
       if (!d.active) {
-        if (Math.hypot(ev.clientX - d.startX, ev.clientY - d.startY) < 6) return
-        d.active = true
-        setDragging(true)
-        const scale = eyeletOnScreen(0)?.scale ?? 0.4
-        d.ghost = makeGhost(d.charm, ev.clientX, ev.clientY, d.charm.onBag.w * scale)
-        d.ghost.classList.add(styles.ghostLifted)
-        d.moveX = gsap.quickTo(d.ghost, 'x', { duration: 0.18, ease: 'power3' })
-        d.moveY = gsap.quickTo(d.ghost, 'y', { duration: 0.18, ease: 'power3' })
+        const moved = Math.hypot(ev.clientX - d.startX, ev.clientY - d.startY)
+        if (isTouch) {
+          if (moved > 10) cleanup() // finger slid before the long press: not a move
+          return
+        }
+        if (moved < MOVE_THRESHOLD) return
+        activateDrag(d)
       }
-      d.moveX?.(ev.clientX)
-      d.moveY?.(ev.clientY)
-      const t = nearestFreeEyelet(ev.clientX, ev.clientY)
+      ev.preventDefault()
+      const x = ev.clientX + d.offX
+      const y = ev.clientY + d.offY
+      d.moveX?.(x)
+      d.moveY?.(y)
+      const t = nearestFreeEyelet(x, y, d.from)
       if (t !== d.target) {
         d.target = t
         setDropTarget(t)
       }
     }
 
-    const onUp = (ev: PointerEvent) => {
-      const d = drag.current
-      if (!d || ev.pointerId !== d.pointerId) return
-      window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('pointerup', onUp)
-      window.removeEventListener('pointercancel', onUp)
-      drag.current = null
-      if (!d.active || !d.ghost) return // a plain click: onClick adds it
-      suppressClick.current = true
-      window.setTimeout(() => (suppressClick.current = false), 0)
+    const finish = (dropped: boolean) => {
+      cleanup()
+      if (!d.active || !d.ghost) return // a plain click/tap: onClick handles it
+      suppressClickUntil.current = performance.now() + 450
       setDragging(false)
       setDropTarget(null)
+      setMovingFrom(null)
       const ghost = d.ghost
-      const target = d.target
-      const to = target !== null ? eyeletOnScreen(target) : null
-      if (target !== null && to) {
-        reserved.current.add(target)
-        setStatus(`${d.charm.name} added.`)
+      const target = dropped ? d.target : null
+      const showPieceAgain = () => {
+        const piece = d.from !== null ? pieceRefs.current.get(d.from) : null
+        if (piece) gsap.set(piece, { opacity: 1 })
+      }
+
+      // Dropped on an eyelet
+      if (target !== null) {
+        const to = eyeletOnScreen(target)
+        if (d.from === null) reserved.current.add(target)
         gsap.to(ghost, {
-          x: to.x,
-          y: to.y,
+          x: to?.x ?? d.lastX,
+          y: to?.y ?? d.lastY,
           scale: 1,
           duration: 0.22,
           ease: 'power3.out',
           onComplete: () => {
             ghost.remove()
-            commit(d.charm.id, target)
+            if (d.from === null) {
+              setStatus(`${d.charm.name} added.`)
+              commit(d.charm.id, target)
+            } else if (target === d.from) {
+              showPieceAgain() // put back where it was
+            } else {
+              const from = d.from
+              setStatus(`${d.charm.name} moved.`)
+              justPlaced.current = target
+              setPlaced((prev) => prev.map((p) => (p.eyelet === from ? { ...p, eyelet: target } : p)))
+            }
           },
         })
-      } else {
-        // missed the bag: float back to the card
+        return
+      }
+
+      // Missed: a new charm floats back to its card, a moved one returns to its eyelet
+      if (d.from === null) {
         const home = cardRefs.current.get(d.charm.id)?.getBoundingClientRect()
         gsap.to(ghost, {
-          x: home ? home.left + home.width / 2 : ev.clientX,
-          y: home ? home.top + home.height / 2 : ev.clientY,
+          x: home ? home.left + home.width / 2 : d.lastX,
+          y: home ? home.top + home.height / 2 : d.lastY,
           opacity: 0,
           scale: 0.6,
           duration: 0.4,
           ease: 'power2.in',
           onComplete: () => ghost.remove(),
         })
+      } else {
+        const at = eyeletOnScreen(d.from)
+        gsap.to(ghost, {
+          x: at?.x ?? d.lastX,
+          y: at?.y ?? d.lastY,
+          scale: 1,
+          duration: 0.35,
+          ease: 'power3.inOut',
+          onComplete: () => {
+            ghost.remove()
+            showPieceAgain()
+          },
+        })
       }
     }
 
-    window.addEventListener('pointermove', onMove)
+    const onUp = (ev: PointerEvent) => {
+      if (ev.pointerId === d.pointerId) finish(true)
+    }
+    const onCancel = (ev: PointerEvent) => {
+      if (ev.pointerId === d.pointerId) finish(false)
+    }
+
+    window.addEventListener('pointermove', onMove, { passive: false })
     window.addEventListener('pointerup', onUp)
-    window.addEventListener('pointercancel', onUp)
+    window.addEventListener('pointercancel', onCancel)
   }
 
   // Clean up a ghost if the section unmounts mid-drag
@@ -442,21 +518,12 @@ export function CharmBuilder({
               />
             ))}
 
-            {/* gold lines joining the charms in the order they were added */}
-            <svg className={styles.lines} viewBox={`0 0 ${bagPhoto.width} ${bagPhoto.height}`} aria-hidden="true">
-              {links.map((l, i) => {
-                const [x1, y1] = eyelets[l.from]
-                const [x2, y2] = eyelets[l.to]
-                return <line key={`${l.from}-${l.to}`} data-line={i + 1} x1={x1} y1={y1} x2={x2} y2={y2} />
-              })}
-            </svg>
-
             {/* eyelet hotspots: glow while dragging, sparkle when a charm lands */}
             {eyelets.map(([x, y], i) => (
               <span
                 key={i}
                 aria-hidden="true"
-                className={`${styles.hotspot} ${!taken.has(i) ? styles.hotspotFree : ''} ${dropTarget === i ? styles.hotspotTarget : ''}`}
+                className={`${styles.hotspot} ${!taken.has(i) || movingFrom === i ? styles.hotspotFree : ''} ${dropTarget === i ? styles.hotspotTarget : ''}`}
                 style={{ left: `${(x / bagPhoto.width) * 100}%`, top: `${(y / bagPhoto.height) * 100}%` }}
               >
                 <span className={styles.spark} data-spark={i} />
@@ -479,7 +546,9 @@ export function CharmBuilder({
                     transform: `translate(${-c.onBag.anchorX * 100}%, ${-c.onBag.anchorY * 100}%)`,
                   }}
                   onClick={() => removeAt(p.eyelet)}
-                  aria-label={`Remove ${c.name} from eyelet ${p.eyelet + 1}`}
+                  onPointerDown={(e) => startDrag(e, c, p.eyelet)}
+                  onContextMenu={(e) => e.preventDefault()}
+                  aria-label={`${c.name} on eyelet ${p.eyelet + 1}. Press to remove; long-press and drag to move.`}
                 >
                   <img
                     ref={(el) => {
@@ -539,7 +608,7 @@ export function CharmBuilder({
                 type="button"
                 className={styles.card}
                 onClick={() => addCharm(c)}
-                onPointerDown={(e) => onCardPointerDown(e, c)}
+                onPointerDown={(e) => startDrag(e, c, null)}
                 aria-label={`Add ${c.name}, ${usd.format(charmPrice)}`}
               >
                 <span className={styles.media}>

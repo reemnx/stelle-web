@@ -94,8 +94,8 @@ export const charmBuilder = {
   eyebrow: 'First Light · 10 charms',
   title: 'Build your constellation',
   /** Desktop (mouse) and touch-screen versions of the how-to line */
-  intro: 'Click a charm to add it, or drag it onto any eyelet. Click a charm on the bag to take it off.',
-  introTouch: 'Tap a charm to add it. Tap a charm on the bag to take it off.',
+  intro: 'Click a charm to add it, or drag it onto any eyelet. On the bag, drag a charm to move it or click it to take it off.',
+  introTouch: 'Tap a charm to add it. On the bag, long-press a charm to move it, or tap it to take it off.',
   /** Price of each charm, in USD */
   charmPrice: 19.9,
   /** Charms that come free with every bag */

@@ -60,24 +60,6 @@
   opacity: 1;
 }
 
-.lines {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.lines line {
-  stroke: #f4e2b4;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  opacity: 0.7;
-  filter: drop-shadow(0 0 4px rgba(244, 226, 180, 0.9));
-}
-
 /* Eyelet hotspots */
 .hotspot {
   position: absolute;
@@ -126,8 +108,14 @@
   padding: 0;
   border: 0;
   background: none;
-  cursor: pointer;
+  cursor: grab;
   line-height: 0;
+  /* Hold-to-move on touch: no page scroll, text selection or iOS callout on a charm */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .pieceDrop {
