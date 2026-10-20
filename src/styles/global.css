@@ -8,6 +8,15 @@
 
   --font-display: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
   --font-body: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Fixed header height, so the mobile hero can fill exactly the rest of the screen */
+  --header-height: 78px;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --header-height: 56px;
+  }
 }
 
 *,

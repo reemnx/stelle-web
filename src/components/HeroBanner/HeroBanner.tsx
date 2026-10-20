@@ -34,6 +34,12 @@ export function HeroBanner({
   const isMobile = useMediaQuery(`(max-width: ${mobileBreakpoint - 1}px)`)
   const prefersReducedMotion = usePrefersReducedMotion()
   const videoRef = useRef<HTMLVideoElement>(null)
+  const sectionRef = useRef<HTMLElement>(null)
+
+  const scrollToNext = () => {
+    const next = sectionRef.current?.nextElementSibling
+    next?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' })
+  }
 
   const source = isMobile ? mobile : desktop
 
@@ -55,7 +61,7 @@ export function HeroBanner({
   }, [source.src, prefersReducedMotion])
 
   return (
-    <section className={styles.hero}>
+    <section ref={sectionRef} className={styles.hero}>
       <video
         // A new key remounts the element so the browser loads the new file
         key={source.src}
@@ -82,6 +88,25 @@ export function HeroBanner({
       />
 
       {children ? <div className={styles.content}>{children}</div> : null}
+
+      {/* Mobile only (hidden by CSS on desktop): hints there is more below */}
+      <button
+        type="button"
+        className={styles.scrollCue}
+        onClick={scrollToNext}
+        aria-label="Scroll to the next section"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M12 4v15M5.5 12.5 12 19l6.5-6.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
     </section>
   )
 }

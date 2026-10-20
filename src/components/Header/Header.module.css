@@ -5,7 +5,8 @@
 .inner {
   max-width: 1360px;
   margin: 0 auto;
-  padding: 22px 40px;
+  height: var(--header-height);
+  padding: 0 40px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -30,7 +31,7 @@
 
 @media (max-width: 767px) {
   .inner {
-    padding: 16px;
+    padding: 0 16px;
   }
 
   .logo {
