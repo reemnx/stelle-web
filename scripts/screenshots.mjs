@@ -18,7 +18,10 @@ async function run(name, viewport, isMobile) {
   await page.waitForTimeout(1200)
   await page.screenshot({ path: `shots/${name}-02-builder-empty.png` })
   for (const label of ['Polaris', 'Luna', 'Comet', 'Sol', 'Coeur', 'Clé']) {
-    await page.getByRole('button', { name: new RegExp(`^Add ${label},`) }).click()
+    const card = page.getByRole('button', { name: new RegExp(`^Add ${label},`) })
+    // keep the card just below the sticky bag, like a person scrolling would
+    await card.evaluate((el) => el.scrollIntoView({ block: 'end', inline: 'nearest' }))
+    await card.click()
     await page.waitForTimeout(1100)
   }
   await sky.scrollIntoViewIfNeeded()

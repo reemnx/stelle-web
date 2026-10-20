@@ -443,20 +443,41 @@
 /* ============ Tablet & mobile: bag on top (sticky), charms below ============ */
 
 @media (max-width: 1023px) {
+  /* Order: title → sticky bag → charms → total. The panel's children join the section grid. */
   .section {
     grid-template-columns: 1fr;
   }
 
+  .panel {
+    display: contents;
+  }
+
+  .head {
+    order: 0;
+    padding: 40px 16px 24px;
+  }
+
   .stageCol {
+    order: 1;
     z-index: 5;
     height: auto;
-    padding: 14px 16px 12px;
+    padding: 12px 16px 10px;
     gap: 10px;
     box-shadow: 0 10px 20px -16px rgba(0, 0, 0, 0.6);
   }
 
+  .grid {
+    order: 2;
+    padding: 24px 16px 0;
+  }
+
+  .summary {
+    order: 3;
+    margin: 24px 16px 40px;
+  }
+
   .stage {
-    height: 46svh;
+    height: 42svh;
     flex: none;
   }
 
@@ -471,11 +492,6 @@
     height: 22px;
   }
 
-  .panel {
-    padding: 36px 16px 48px;
-    gap: 24px;
-  }
-
   .title {
     font-size: 38px;
   }
@@ -483,21 +499,11 @@
 
 /* Phones: the charms become one swipeable tray, so bag + charms + total fit on one screen */
 @media (max-width: 767px) {
-  .panel {
-    padding: 28px 0 40px;
-  }
-
-  .head,
-  .summary {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
   .grid {
     display: flex;
     gap: 10px;
     overflow-x: auto;
-    padding: 0 16px 6px;
+    padding: 18px 16px 6px;
     scroll-snap-type: x mandatory;
     scroll-padding: 0 16px;
     -webkit-overflow-scrolling: touch;
