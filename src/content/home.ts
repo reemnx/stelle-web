@@ -8,11 +8,11 @@ import type { HeroVideoSource } from '@/components/HeroBanner'
 export const heroVideos: { desktop: HeroVideoSource; mobile: HeroVideoSource } = {
   // DEMO — replace with the 16:9 STELLÉ hero film
   desktop: {
-    src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+    src: '/videos/hero-desktop.mp4',
   },
   // DEMO — replace with the 9:16 STELLÉ hero film
   mobile: {
-    src: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    src: '/videos/hero-mobile.mp4',
   },
 }
 
