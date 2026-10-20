@@ -1,0 +1,41 @@
+.header {
+  background: var(--color-ivory);
+}
+
+.inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 22px 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.32em;
+  /* letter-spacing adds space after the last letter; balance it on the left
+     so the wordmark sits optically centered */
+  padding-left: 0.32em;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.logo:hover {
+  color: var(--color-chocolate);
+}
+
+@media (max-width: 767px) {
+  .inner {
+    padding: 16px;
+  }
+
+  .logo {
+    font-size: 24px;
+    letter-spacing: 0.3em;
+    padding-left: 0.3em;
+  }
+}
