@@ -1,0 +1,31 @@
+name: Screenshots
+
+# Manual: builds the site, clicks through the Constellation Builder in a real
+# browser and pushes the screenshots to the `ci-shots` branch for review.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - run: npm run build
+      - run: npm install --no-save --no-audit --no-fund playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: |
+          npx vite preview --port 4173 --strictPort &
+          npx wait-on -t 30000 http://localhost:4173 || sleep 5
+          node scripts/screenshots.mjs
+      - run: |
+          cd shots
+          git init -q -b ci-shots
+          git add .
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "screenshots ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" ci-shots
