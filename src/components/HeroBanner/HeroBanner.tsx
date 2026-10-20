@@ -5,7 +5,7 @@ import styles from './HeroBanner.module.css'
 export type HeroVideoSource = {
   /** Video file URL, e.g. "/videos/hero-desktop.mp4" */
   src: string
-  /** MIME type, defaults to "video/mp4" */
+  /** Optional MIME type (currently unused; the browser detects it) */
   type?: string
   /** Still image shown before the video loads, and instead of it for reduced motion */
   poster?: string
@@ -69,9 +69,17 @@ export function HeroBanner({
         preload="auto"
         aria-label={ariaLabel}
         aria-hidden={ariaLabel ? undefined : true}
-      >
-        <source src={source.src} type={source.type ?? 'video/mp4'} />
-      </video>
+        // src directly on <video>: no MIME-type guess that could make the
+        // browser skip a .mov/.webm file
+        src={source.src}
+        onError={(e) => {
+          const err = e.currentTarget.error
+          console.error(
+            `[HeroBanner] Video failed to load: ${source.src}`,
+            err ? `(code ${err.code}: ${err.message || 'see MediaError codes'})` : '',
+          )
+        }}
+      />
 
       {children ? <div className={styles.content}>{children}</div> : null}
     </section>
