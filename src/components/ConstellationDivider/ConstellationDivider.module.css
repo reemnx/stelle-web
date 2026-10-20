@@ -1,0 +1,41 @@
+.divider {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 40px 40px 0;
+}
+
+.field {
+  position: relative;
+  height: 60px;
+}
+
+.lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.lines polyline {
+  fill: none;
+  stroke: var(--color-gold);
+  stroke-width: 0.8;
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--color-gold);
+  transform: translate(-50%, -50%);
+}
+
+@media (max-width: 767px) {
+  .divider {
+    padding: 28px 16px 0;
+  }
+
+  .field {
+    height: 44px;
+  }
+}
