@@ -1,0 +1,36 @@
+/* Brand tokens — from the STELLÉ brand book */
+:root {
+  --color-ink: #1e2230;
+  --color-ivory: #f3ede2;
+  --color-chocolate: #4a3428;
+  --color-pistachio: #b9c4a0;
+  --color-gold: #b8945a; /* lines and icons only, never body text */
+
+  --font-display: 'Bodoni Moda', Georgia, 'Times New Roman', serif;
+  --font-body: 'Instrument Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+video {
+  display: block;
+  max-width: 100%;
+}
