@@ -247,6 +247,21 @@
   line-height: 1.55;
 }
 
+/* Touch screens can't drag (the page scrolls instead), so they get the tap-only line */
+.introTouch {
+  display: none;
+}
+
+@media (hover: none) {
+  .introPointer {
+    display: none;
+  }
+
+  .introTouch {
+    display: inline;
+  }
+}
+
 .grid {
   list-style: none;
   margin: 0;

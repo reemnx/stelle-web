@@ -11,6 +11,7 @@ type CharmBuilderProps = {
   eyebrow: string
   title: string
   intro: string
+  introTouch: string
   charmPrice: number
   includedCharms: number
   charms: Charm[]
@@ -79,6 +80,7 @@ export function CharmBuilder({
   eyebrow,
   title,
   intro,
+  introTouch,
   charmPrice,
   includedCharms,
   charms,
@@ -520,7 +522,10 @@ export function CharmBuilder({
           <h2 id="builder-title" className={styles.title}>
             {title}
           </h2>
-          <p className={styles.intro}>{intro}</p>
+          <p className={styles.intro}>
+            <span className={styles.introPointer}>{intro}</span>
+            <span className={styles.introTouch}>{introTouch}</span>
+          </p>
         </div>
 
         <ul className={styles.grid}>
