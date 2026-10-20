@@ -6,13 +6,13 @@ import type { HeroVideoSource } from '@/components/HeroBanner'
  *   src: '/videos/hero-desktop.mp4'
  */
 export const heroVideos: { desktop: HeroVideoSource; mobile: HeroVideoSource } = {
-  // DEMO — replace with the 16:9 STELLÉ hero film
+  // "Day to night" FW26-style edit, 16:9 (480p preview; swap for the 1080p finalize later)
   desktop: {
-    src: '/videos/hero-desktop.mp4',
+    src: '/videos/hero-fw26-desktop.mp4',
   },
-  // DEMO — replace with the 9:16 STELLÉ hero film
+  // Same edit, 9:16
   mobile: {
-    src: '/videos/hero-mobile.mp4',
+    src: '/videos/hero-fw26-mobile.mp4',
   },
 }
 
