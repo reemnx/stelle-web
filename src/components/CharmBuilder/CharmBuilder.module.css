@@ -1,0 +1,508 @@
+/* Two columns on desktop: the bag stage (sticky) and the dark charm panel */
+.section {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  background: var(--color-ink);
+  color: var(--color-ivory);
+}
+
+/* ============ Stage ============ */
+
+.stageCol {
+  background: #ead9c6; /* matches the studio backdrop of the bag photos */
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  align-self: start;
+}
+
+/*
+ * The stage shows a crop of the bag photo (the bag, not the empty backdrop):
+ * 76% of its width and 78% of its height. The inner layer is the full photo,
+ * scaled up and shifted so that crop fills the stage.
+ */
+.stage {
+  position: relative;
+  height: min(calc(100svh - 170px), 760px);
+  max-width: 100%;
+  aspect-ratio: 0.785;
+  overflow: hidden;
+  flex: none;
+}
+
+.layer {
+  position: absolute;
+  width: 131.6%;
+  left: -15.8%;
+  top: -10.26%;
+  transform-origin: 50% 55%;
+}
+
+.bagPhoto {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  user-select: none;
+}
+
+.bagActive {
+  opacity: 1;
+}
+
+.lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lines line {
+  stroke: #f4e2b4;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 4px rgba(244, 226, 180, 0.9));
+}
+
+/* Eyelet hotspots */
+.hotspot {
+  position: absolute;
+  width: 4.6%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.isDragging .hotspotFree {
+  box-shadow:
+    0 0 0 2px rgba(244, 226, 180, 0.9),
+    0 0 18px 4px rgba(244, 226, 180, 0.55);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.isDragging .hotspotTarget {
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 26px 8px rgba(255, 236, 190, 0.95);
+  animation: none;
+  transform: translate(-50%, -50%) scale(1.25);
+}
+
+@keyframes pulse {
+  50% {
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+}
+
+.spark {
+  position: absolute;
+  inset: -30%;
+  border-radius: 50%;
+  border: 2px solid #f4e2b4;
+  box-shadow: 0 0 14px rgba(244, 226, 180, 0.9);
+  opacity: 0;
+}
+
+/* Charms on the bag */
+.piece {
+  position: absolute;
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.pieceDrop {
+  z-index: 3; /* chains hang over the flush charms below them */
+}
+
+.pieceImg {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 3px 3px rgba(20, 14, 8, 0.45));
+  user-select: none;
+  pointer-events: none;
+}
+
+.piece:hover .pieceImg {
+  filter: drop-shadow(0 3px 3px rgba(20, 14, 8, 0.45)) brightness(1.08);
+}
+
+.piece:focus-visible {
+  outline: 2px solid var(--color-ivory);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+/* The charm image that flies / follows the pointer (lives on <body>) */
+.ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 12px rgba(20, 14, 8, 0.35));
+  will-change: transform;
+}
+
+.ghostLifted {
+  filter: drop-shadow(0 18px 18px rgba(20, 14, 8, 0.35));
+}
+
+/* Colour swatches */
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  flex: none;
+}
+
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 16px 8px 8px;
+  border: 1px solid rgba(30, 34, 48, 0.25);
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.swatch:hover {
+  border-color: var(--color-ink);
+}
+
+.swatchOn {
+  background: #fffaf2;
+  border-color: var(--color-ink);
+}
+
+.swatchDot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+/* ============ Panel ============ */
+
+.panel {
+  padding: 72px 48px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #e2c892;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 52px;
+  line-height: 1.02;
+}
+
+.intro {
+  margin: 0;
+  max-width: 440px;
+  color: #c9ccd6;
+  line-height: 1.55;
+}
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px 14px;
+}
+
+.card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: grab;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.card:active {
+  cursor: grabbing;
+}
+
+.card:focus-visible {
+  outline: 2px solid #e2c892;
+  outline-offset: 4px;
+}
+
+.media {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #ece2d4;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+  user-select: none;
+}
+
+.card:hover .image {
+  transform: scale(1.05);
+}
+
+.plus {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: var(--color-ivory);
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.25s ease;
+}
+
+.card:hover .plus {
+  transform: rotate(90deg);
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: 19px;
+  line-height: 1.2;
+}
+
+.price {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.kind {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e2c892;
+}
+
+/* Summary */
+.summary {
+  border-top: 1px solid #3a3f52;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.primary,
+.secondary {
+  flex: 1;
+  min-height: 50px;
+  padding: 14px;
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  border: 0;
+}
+
+.secondary {
+  background: transparent;
+  color: var(--color-ivory);
+  border: 1px solid var(--color-ivory);
+}
+
+.secondary:disabled,
+.clear:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 24px;
+}
+
+.clear {
+  background: none;
+  border: 0;
+  padding: 6px 0;
+  color: #aeb2bf;
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.status {
+  margin: 0;
+  font-size: 13px;
+  color: #e2c892;
+  text-align: right;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bagPhoto,
+  .image,
+  .plus {
+    transition: none;
+  }
+
+  .isDragging .hotspotFree {
+    animation: none;
+  }
+}
+
+/* ============ Tablet & mobile: bag on top (sticky), charms below ============ */
+
+@media (max-width: 1023px) {
+  .section {
+    grid-template-columns: 1fr;
+  }
+
+  .stageCol {
+    z-index: 5;
+    height: auto;
+    padding: 14px 16px 12px;
+    gap: 10px;
+    box-shadow: 0 10px 20px -16px rgba(0, 0, 0, 0.6);
+  }
+
+  .stage {
+    height: 46svh;
+    flex: none;
+  }
+
+  .swatch {
+    min-height: 40px;
+    padding: 6px 12px 6px 6px;
+    font-size: 13px;
+  }
+
+  .swatchDot {
+    width: 22px;
+    height: 22px;
+  }
+
+  .panel {
+    padding: 36px 16px 48px;
+    gap: 24px;
+  }
+
+  .title {
+    font-size: 38px;
+  }
+}
+
+@media (max-width: 767px) {
+  .grid {
+    gap: 18px 10px;
+  }
+
+  .name {
+    font-size: 15px;
+  }
+
+  .meta {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .price {
+    font-size: 13px;
+  }
+
+  .plus {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}

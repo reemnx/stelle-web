@@ -1,8 +1,8 @@
 import { BagCollection } from '@/components/BagCollection'
-import { CharmDrop } from '@/components/CharmDrop'
+import { CharmBuilder } from '@/components/CharmBuilder'
 import { HeroBanner } from '@/components/HeroBanner'
 import { SocialGallery } from '@/components/SocialGallery'
-import { bagCollection, charmDrop, heroVideos, socialGallery } from '@/content/home'
+import { bagCollection, charmBuilder, heroVideos, socialGallery } from '@/content/home'
 
 export function HomePage() {
   return (
@@ -12,7 +12,7 @@ export function HomePage() {
       {/* <ConstellationDivider /> */}
       <BagCollection {...bagCollection} />
       <SocialGallery {...socialGallery} />
-      <CharmDrop {...charmDrop} />
+      <CharmBuilder {...charmBuilder} />
     </>
   )
 }

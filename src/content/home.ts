@@ -58,35 +58,73 @@ export const bagCollection = {
 }
 
 export type Charm = {
+  id: string
   name: string
-  /** Flush sits in the eyelet; Drop hangs on a chain */
+  /** Flush sits on the eyelet; Drop hangs from it on a chain */
   kind: 'Flush' | 'Drop'
   description: string
-  /** Photo in public/images/charms/ (640 × 800, cut from the FIRST LIGHT flat lay) */
+  /** Card photo in public/images/charms/ (640 × 800, cut from the FIRST LIGHT flat lay) */
   image: string
-  price: string
+  /** Transparent cut-out shown on the bag, public/images/charms/onbag/ */
+  cutout: string
+  /** Size on the bag in bag-photo pixels (photo is 1200 × 1490) and the point that sits on the eyelet (0–1) */
+  onBag: { w: number; h: number; anchorX: number; anchorY: number }
 }
 
-const CHARM_PRICE = '$19.90'
+const charm = (
+  id: string,
+  name: string,
+  kind: Charm['kind'],
+  description: string,
+  w: number,
+  h: number,
+  anchorY: number,
+): Charm => ({
+  id,
+  name,
+  kind,
+  description,
+  image: `/images/charms/${id}.jpg`,
+  cutout: `/images/charms/onbag/${id}.webp`,
+  onBag: { w, h, anchorX: 0.5, anchorY },
+})
 
-/** "First Light" charm drop section */
-export const charmDrop = {
-  eyebrow: 'The Sky · Drop 01',
-  title: 'First Light',
-  intro:
-    'Ten charms named for the first stars of the evening. Six sit flush in the eyelet, four fall on a fine chain.',
+/** Constellation Builder: the First Light charms + the bag they go on */
+export const charmBuilder = {
+  eyebrow: 'First Light · 10 charms',
+  title: 'Build your constellation',
+  intro: 'Tap a charm to add it, or drag it onto any eyelet. Tap a charm on the bag to take it off.',
+  /** Price of each charm, in USD */
+  charmPrice: 19.9,
+  /** Charms that come free with every bag */
+  includedCharms: 3,
   charms: [
-    { name: 'Polaris', kind: 'Flush', description: 'Eight-point star, pavé centre', image: '/images/charms/polaris.jpg', price: CHARM_PRICE },
-    { name: 'Luna', kind: 'Flush', description: 'Crescent, mother-of-pearl', image: '/images/charms/luna.jpg', price: CHARM_PRICE },
-    { name: 'Vega', kind: 'Flush', description: 'Baroque pearl in prongs', image: '/images/charms/vega.jpg', price: CHARM_PRICE },
-    { name: 'Sol', kind: 'Flush', description: 'Hand-hammered sun disc', image: '/images/charms/sol.jpg', price: CHARM_PRICE },
-    { name: 'Coeur', kind: 'Flush', description: 'Puffed heart, cream enamel', image: '/images/charms/coeur.jpg', price: CHARM_PRICE },
-    { name: 'Initial', kind: 'Flush', description: 'Serif letter, A to Z', image: '/images/charms/initial.jpg', price: CHARM_PRICE },
-    { name: 'Comet', kind: 'Drop', description: 'Two falling stars on a chain', image: '/images/charms/comet.jpg', price: CHARM_PRICE },
-    { name: 'Pearl Drop', kind: 'Drop', description: 'Freshwater pearl, fine chain', image: '/images/charms/pearl-drop.jpg', price: CHARM_PRICE },
-    { name: 'Clé', kind: 'Drop', description: 'Vintage key, the next chapter', image: '/images/charms/cle.jpg', price: CHARM_PRICE },
-    { name: 'Constellation Coin', kind: 'Drop', description: 'Engraved medallion', image: '/images/charms/coin.jpg', price: CHARM_PRICE },
+    charm('polaris', 'Polaris', 'Flush', 'Eight-point star, pavé centre', 101, 104, 0.5),
+    charm('luna', 'Luna', 'Flush', 'Crescent, mother-of-pearl', 80, 100, 0.5),
+    charm('vega', 'Vega', 'Flush', 'Baroque pearl in prongs', 64, 81, 0.5),
+    charm('sol', 'Sol', 'Flush', 'Hand-hammered sun disc', 91, 96, 0.5),
+    charm('coeur', 'Coeur', 'Flush', 'Puffed heart, cream enamel', 88, 78, 0.5),
+    charm('initial', 'Initial', 'Flush', 'Serif letter, A to Z', 76, 81, 0.5),
+    charm('comet', 'Comet', 'Drop', 'Two falling stars on a chain', 51, 218, 0.0182),
+    charm('pearl-drop', 'Pearl Drop', 'Drop', 'Freshwater pearl, fine chain', 32, 166, 0.0239),
+    charm('cle', 'Clé', 'Drop', 'Vintage key, the next chapter', 51, 187, 0.0212),
+    charm('coin', 'Constellation Coin', 'Drop', 'Engraved medallion', 86, 175, 0.0226),
   ] satisfies Charm[],
+  bags: [
+    { name: 'Chocolate', swatch: '#4A3428', image: '/images/bags/chocolate.jpg' },
+    { name: 'Pistachio', swatch: '#B9C4A0', image: '/images/bags/pistachio.jpg' },
+    { name: 'Off-white', swatch: '#E4DACB', image: '/images/bags/off-white.jpg' },
+  ],
+  /** Bag photo size and the centre of each of the 16 eyelets on it (same on all three colours) */
+  bagPhoto: { width: 1200, height: 1490 },
+  eyelets: [
+    [296, 628], [929, 630],
+    [354, 743], [486, 743], [744, 743], [871, 743],
+    [353, 851], [486, 851], [616, 851], [746, 851], [870, 851],
+    [355, 959], [485, 959], [615, 959], [743, 959], [871, 959],
+  ] as [number, number][],
+  /** Order eyelets fill in when a charm is tapped (centre outwards) */
+  fillOrder: [8, 3, 4, 12, 14, 7, 9, 13, 2, 5, 6, 10, 11, 15, 0, 1],
 }
 
 export type GalleryPhoto = {
