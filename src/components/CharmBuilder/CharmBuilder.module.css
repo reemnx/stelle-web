@@ -72,9 +72,9 @@
 
 .lines line {
   stroke: #f4e2b4;
-  stroke-width: 2.5;
+  stroke-width: 1.8;
   stroke-linecap: round;
-  opacity: 0.85;
+  opacity: 0.7;
   filter: drop-shadow(0 0 4px rgba(244, 226, 180, 0.9));
 }
 
@@ -212,10 +212,10 @@
 /* ============ Panel ============ */
 
 .panel {
-  padding: 72px 48px 56px;
+  padding: 56px 40px 40px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 28px;
 }
 
 .head {
@@ -236,7 +236,7 @@
   margin: 0;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 52px;
+  font-size: 46px;
   line-height: 1.02;
 }
 
@@ -252,8 +252,9 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px 14px;
+  /* 5 × 2 on desktop, so all ten charms and the bag fit on one screen */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 18px 12px;
 }
 
 .card {
@@ -305,8 +306,8 @@
   position: absolute;
   right: 8px;
   bottom: 8px;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -324,19 +325,21 @@
 
 .meta {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .name {
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 16px;
   line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .price {
-  font-size: 14px;
+  font-size: 13px;
   white-space: nowrap;
 }
 
@@ -478,28 +481,46 @@
   }
 }
 
+/* Phones: the charms become one swipeable tray, so bag + charms + total fit on one screen */
 @media (max-width: 767px) {
+  .panel {
+    padding: 28px 0 40px;
+  }
+
+  .head,
+  .summary {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .grid {
-    gap: 18px 10px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 0 16px 6px;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .grid > li {
+    flex: 0 0 31%;
+    scroll-snap-align: start;
   }
 
   .name {
     font-size: 15px;
   }
 
-  .meta {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .price {
-    font-size: 13px;
-  }
-
   .plus {
-    width: 26px;
-    height: 26px;
-    font-size: 16px;
+    width: 24px;
+    height: 24px;
+    font-size: 15px;
   }
 
   .actions {

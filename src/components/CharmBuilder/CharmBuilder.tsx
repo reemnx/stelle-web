@@ -17,7 +17,7 @@ type CharmBuilderProps = {
   bags: Bag[]
   bagPhoto: { width: number; height: number }
   eyelets: [number, number][]
-  fillOrder: number[]
+  fillOrder: Record<Charm['kind'], number[]>
 }
 
 /** One charm screwed into one eyelet. Array order = the order they were added */
@@ -111,6 +111,26 @@ export function CharmBuilder({
   const charmById = useMemo(() => new Map(charms.map((c) => [c.id, c])), [charms])
   const taken = useMemo(() => new Set(placed.map((p) => p.eyelet)), [placed])
 
+  /** Constellation lines: each charm links to the nearest charm placed before it */
+  const links = useMemo(
+    () =>
+      placed.slice(1).map((p, k) => {
+        const [x, y] = eyelets[p.eyelet]
+        let best = placed[0].eyelet
+        let bestD = Infinity
+        for (const q of placed.slice(0, k + 1)) {
+          const [qx, qy] = eyelets[q.eyelet]
+          const d = Math.hypot(qx - x, qy - y)
+          if (d < bestD) {
+            bestD = d
+            best = q.eyelet
+          }
+        }
+        return { from: best, to: p.eyelet }
+      }),
+    [placed, eyelets],
+  )
+
   /* ----- restore a shared link or the last design on this device ----- */
   useEffect(() => {
     const saved = readSavedSky(charms, eyelets.length, bags.length)
@@ -142,7 +162,7 @@ export function CharmBuilder({
   )
 
   const isFree = useCallback((i: number) => !taken.has(i) && !reserved.current.has(i), [taken])
-  const nextFreeEyelet = useCallback(() => fillOrder.find(isFree) ?? null, [fillOrder, isFree])
+  const nextFreeEyelet = useCallback((kind: Charm['kind']) => fillOrder[kind].find(isFree) ?? null, [fillOrder, isFree])
 
   /* ----- the "screw in" moment, right after a charm lands ----- */
   useLayoutEffect(() => {
@@ -239,7 +259,7 @@ export function CharmBuilder({
       suppressClick.current = false
       return
     }
-    const eyelet = nextFreeEyelet()
+    const eyelet = nextFreeEyelet(charm.kind)
     if (eyelet === null) {
       setStatus('All 16 eyelets are full. Tap a charm on the bag to take it off.')
       return
@@ -422,10 +442,10 @@ export function CharmBuilder({
 
             {/* gold lines joining the charms in the order they were added */}
             <svg className={styles.lines} viewBox={`0 0 ${bagPhoto.width} ${bagPhoto.height}`} aria-hidden="true">
-              {placed.slice(1).map((p, i) => {
-                const [x1, y1] = eyelets[placed[i].eyelet]
-                const [x2, y2] = eyelets[p.eyelet]
-                return <line key={`${placed[i].eyelet}-${p.eyelet}`} data-line={i + 1} x1={x1} y1={y1} x2={x2} y2={y2} />
+              {links.map((l, i) => {
+                const [x1, y1] = eyelets[l.from]
+                const [x2, y2] = eyelets[l.to]
+                return <line key={`${l.from}-${l.to}`} data-line={i + 1} x1={x1} y1={y1} x2={x2} y2={y2} />
               })}
             </svg>
 

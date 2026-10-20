@@ -99,16 +99,16 @@ export const charmBuilder = {
   /** Charms that come free with every bag */
   includedCharms: 3,
   charms: [
-    charm('polaris', 'Polaris', 'Flush', 'Eight-point star, pavé centre', 101, 104, 0.5),
-    charm('luna', 'Luna', 'Flush', 'Crescent, mother-of-pearl', 80, 100, 0.5),
-    charm('vega', 'Vega', 'Flush', 'Baroque pearl in prongs', 64, 81, 0.5),
-    charm('sol', 'Sol', 'Flush', 'Hand-hammered sun disc', 91, 96, 0.5),
-    charm('coeur', 'Coeur', 'Flush', 'Puffed heart, cream enamel', 88, 78, 0.5),
-    charm('initial', 'Initial', 'Flush', 'Serif letter, A to Z', 76, 81, 0.5),
-    charm('comet', 'Comet', 'Drop', 'Two falling stars on a chain', 51, 218, 0.0182),
-    charm('pearl-drop', 'Pearl Drop', 'Drop', 'Freshwater pearl, fine chain', 32, 166, 0.0239),
-    charm('cle', 'Clé', 'Drop', 'Vintage key, the next chapter', 51, 187, 0.0212),
-    charm('coin', 'Constellation Coin', 'Drop', 'Engraved medallion', 86, 175, 0.0226),
+    charm('polaris', 'Polaris', 'Flush', 'Eight-point star, pavé centre', 126, 130, 0.5),
+    charm('luna', 'Luna', 'Flush', 'Crescent, mother-of-pearl', 100, 125, 0.5),
+    charm('vega', 'Vega', 'Flush', 'Baroque pearl in prongs', 80, 101, 0.5),
+    charm('sol', 'Sol', 'Flush', 'Hand-hammered sun disc', 114, 120, 0.5),
+    charm('coeur', 'Coeur', 'Flush', 'Puffed heart, cream enamel', 110, 98, 0.5),
+    charm('initial', 'Initial', 'Flush', 'Serif letter, A to Z', 95, 101, 0.5),
+    charm('comet', 'Comet', 'Drop', 'Two falling stars on a chain', 66, 283, 0.0182),
+    charm('pearl-drop', 'Pearl Drop', 'Drop', 'Freshwater pearl, fine chain', 42, 216, 0.0239),
+    charm('cle', 'Clé', 'Drop', 'Vintage key, the next chapter', 66, 243, 0.0212),
+    charm('coin', 'Constellation Coin', 'Drop', 'Engraved medallion', 112, 228, 0.0226),
   ] satisfies Charm[],
   bags: [
     { name: 'Chocolate', swatch: '#4A3428', image: '/images/bags/chocolate.jpg' },
@@ -123,8 +123,14 @@ export const charmBuilder = {
     [353, 851], [486, 851], [616, 851], [746, 851], [870, 851],
     [355, 959], [485, 959], [615, 959], [743, 959], [871, 959],
   ] as [number, number][],
-  /** Order eyelets fill in when a charm is tapped (centre outwards) */
-  fillOrder: [8, 3, 4, 12, 14, 7, 9, 13, 2, 5, 6, 10, 11, 15, 0, 1],
+  /**
+   * Order eyelets fill in when a charm is tapped. Flush charms start in the middle rows;
+   * drops start on the bottom row and corners so their chains don't cover other charms.
+   */
+  fillOrder: {
+    Flush: [8, 3, 4, 7, 9, 2, 5, 6, 10, 13, 12, 14, 11, 15, 0, 1],
+    Drop: [13, 12, 14, 11, 15, 0, 1, 8, 7, 9, 6, 10, 3, 4, 2, 5],
+  },
 }
 
 export type GalleryPhoto = {
