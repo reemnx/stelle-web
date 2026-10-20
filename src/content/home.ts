@@ -88,3 +88,44 @@ export const charmDrop = {
     { name: 'Constellation Coin', kind: 'Drop', description: 'Engraved medallion', image: '/images/charms/coin.jpg', price: CHARM_PRICE },
   ] satisfies Charm[],
 }
+
+export type GalleryPhoto = {
+  src: string
+  /** Pixel size of the file, so the browser reserves the right space */
+  width: number
+  height: number
+  alt: string
+  /** Short label shown on hover */
+  caption: string
+}
+
+const photo = (file: string, square: boolean, alt: string, caption: string): GalleryPhoto => ({
+  src: `/images/gallery/${file}.jpg`,
+  width: square ? 800 : 447,
+  height: 800,
+  alt,
+  caption,
+})
+
+/** "#MyStelle" social-proof gallery: two rows that drift in opposite directions */
+export const socialGallery = {
+  eyebrow: 'Seen on you',
+  title: '#MyStelle',
+  intro: 'How the first owners carry their sky. Tag #MyStelle to be featured.',
+  rows: [
+    [
+      photo('g01-glove-tray', false, 'A white-gloved hand presents the chocolate bag on a tray against green velvet', 'Glove & tray · Chocolate'),
+      photo('g02-legs-asphalt', true, 'Loafer, white sock and the chocolate bag on magazines with a coffee', 'Asphalt · Chocolate'),
+      photo('g03-stacked-trio', false, 'Chocolate, pistachio and off-white bags stacked into a tower', 'The trio'),
+      photo('g04-stone-steps', true, 'The pistachio bag on stone steps beside sunglasses and earphones', 'Stone steps · Pistachio'),
+      photo('g05-under-arm', false, 'The off-white bag tucked under the arm with a leopard skirt', 'Under the arm · Off-white'),
+    ],
+    [
+      photo('g06-leather-gloves', true, 'Cognac leather opera gloves lift the pistachio bag', 'Leather gloves · Pistachio'),
+      photo('g07-paris-cafe', false, 'The chocolate bag on a Paris café table', 'Paris café · Chocolate'),
+      photo('g08-macro-pin', true, 'Close-up of the Polaris charm being screwed into an off-white bag', 'Polaris, up close'),
+      photo('g09-alley-steps', false, 'A woman walks down old alley steps carrying the pistachio bag', 'Alley steps · Pistachio'),
+      photo('g10-rooftop-night', true, 'The off-white bag beside a glass of wine on a rooftop at night', 'Rooftop night · Off-white'),
+    ],
+  ] satisfies GalleryPhoto[][],
+}
