@@ -1,7 +1,8 @@
 import { BagCollection } from '@/components/BagCollection'
+import { CharmDrop } from '@/components/CharmDrop'
 import { ConstellationDivider } from '@/components/ConstellationDivider'
 import { HeroBanner } from '@/components/HeroBanner'
-import { bagCollection, heroVideos } from '@/content/home'
+import { bagCollection, charmDrop, heroVideos } from '@/content/home'
 
 export function HomePage() {
   return (
@@ -9,6 +10,7 @@ export function HomePage() {
       <HeroBanner desktop={heroVideos.desktop} mobile={heroVideos.mobile} />
       <ConstellationDivider />
       <BagCollection {...bagCollection} />
+      <CharmDrop {...charmDrop} />
     </>
   )
 }

@@ -56,3 +56,35 @@ export const bagCollection = {
     },
   ] satisfies BagColor[],
 }
+
+export type Charm = {
+  name: string
+  /** Flush sits in the eyelet; Drop hangs on a chain */
+  kind: 'Flush' | 'Drop'
+  description: string
+  /** Photo in public/images/charms/ (640 × 800, cut from the FIRST LIGHT flat lay) */
+  image: string
+  price: string
+}
+
+const CHARM_PRICE = '$19.90'
+
+/** "First Light" charm drop section */
+export const charmDrop = {
+  eyebrow: 'The Sky · Drop 01',
+  title: 'First Light',
+  intro:
+    'Ten charms named for the first stars of the evening. Six sit flush in the eyelet, four fall on a fine chain.',
+  charms: [
+    { name: 'Polaris', kind: 'Flush', description: 'Eight-point star, pavé centre', image: '/images/charms/polaris.jpg', price: CHARM_PRICE },
+    { name: 'Luna', kind: 'Flush', description: 'Crescent, mother-of-pearl', image: '/images/charms/luna.jpg', price: CHARM_PRICE },
+    { name: 'Vega', kind: 'Flush', description: 'Baroque pearl in prongs', image: '/images/charms/vega.jpg', price: CHARM_PRICE },
+    { name: 'Sol', kind: 'Flush', description: 'Hand-hammered sun disc', image: '/images/charms/sol.jpg', price: CHARM_PRICE },
+    { name: 'Coeur', kind: 'Flush', description: 'Puffed heart, cream enamel', image: '/images/charms/coeur.jpg', price: CHARM_PRICE },
+    { name: 'Initial', kind: 'Flush', description: 'Serif letter, A to Z', image: '/images/charms/initial.jpg', price: CHARM_PRICE },
+    { name: 'Comet', kind: 'Drop', description: 'Two falling stars on a chain', image: '/images/charms/comet.jpg', price: CHARM_PRICE },
+    { name: 'Pearl Drop', kind: 'Drop', description: 'Freshwater pearl, fine chain', image: '/images/charms/pearl-drop.jpg', price: CHARM_PRICE },
+    { name: 'Clé', kind: 'Drop', description: 'Vintage key, the next chapter', image: '/images/charms/cle.jpg', price: CHARM_PRICE },
+    { name: 'Constellation Coin', kind: 'Drop', description: 'Engraved medallion', image: '/images/charms/coin.jpg', price: CHARM_PRICE },
+  ] satisfies Charm[],
+}

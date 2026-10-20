@@ -1,0 +1,169 @@
+.section {
+  background: var(--color-ink);
+  color: var(--color-ivory);
+}
+
+.inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 96px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #e2c892;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 64px;
+  line-height: 1;
+}
+
+.intro {
+  margin: 0;
+  max-width: 420px;
+  color: #c9ccd6;
+  line-height: 1.55;
+}
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 40px 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.media {
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #ece2d4;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.card:hover .image {
+  transform: scale(1.04);
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nameRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.price {
+  font-size: 15px;
+  white-space: nowrap;
+  color: var(--color-ivory);
+}
+
+.description {
+  margin: 0;
+  font-size: 13px;
+  color: #c9ccd6;
+}
+
+.kind {
+  margin-top: 6px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e2c892;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image {
+    transition: none;
+  }
+}
+
+/* Small laptop / tablet landscape */
+@media (max-width: 1199px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Tablet */
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Mobile: two columns */
+@media (max-width: 767px) {
+  .inner {
+    padding: 56px 16px;
+    gap: 32px;
+  }
+
+  .title {
+    font-size: 40px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px 12px;
+  }
+
+  .name {
+    font-size: 18px;
+  }
+
+  .nameRow {
+    flex-direction: column;
+    gap: 2px;
+  }
+}
