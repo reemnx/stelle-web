@@ -1,9 +1,10 @@
-import styles from './HomePage.module.css'
+import { HeroBanner } from '@/components/HeroBanner'
+import { heroVideos } from '@/content/home'
 
 export function HomePage() {
   return (
-    <section className={styles.page}>
-      <h1 className={styles.wordmark}>STELLÉ</h1>
-    </section>
+    <>
+      <HeroBanner desktop={heroVideos.desktop} mobile={heroVideos.mobile} />
+    </>
   )
 }

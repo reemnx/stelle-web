@@ -1,0 +1,79 @@
+import { useEffect, useRef, type ReactNode } from 'react'
+import { useMediaQuery, usePrefersReducedMotion } from '@/hooks/useMediaQuery'
+import styles from './HeroBanner.module.css'
+
+export type HeroVideoSource = {
+  /** Video file URL, e.g. "/videos/hero-desktop.mp4" */
+  src: string
+  /** MIME type, defaults to "video/mp4" */
+  type?: string
+  /** Still image shown before the video loads, and instead of it for reduced motion */
+  poster?: string
+}
+
+export type HeroBannerProps = {
+  /** Landscape video for wide screens */
+  desktop: HeroVideoSource
+  /** Portrait video for phones */
+  mobile: HeroVideoSource
+  /** Screens narrower than this (px) get the mobile video. Default 768 */
+  mobileBreakpoint?: number
+  /** Describe the video if it carries meaning; leave empty if purely decorative */
+  ariaLabel?: string
+  /** Optional overlay content (headline, buttons) */
+  children?: ReactNode
+}
+
+export function HeroBanner({
+  desktop,
+  mobile,
+  mobileBreakpoint = 768,
+  ariaLabel,
+  children,
+}: HeroBannerProps) {
+  const isMobile = useMediaQuery(`(max-width: ${mobileBreakpoint - 1}px)`)
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const source = isMobile ? mobile : desktop
+
+  // Browsers only autoplay muted video. React sets `muted` as a property,
+  // which some mobile browsers ignore for autoplay, so enforce it and start
+  // playback explicitly whenever the source changes.
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    video.muted = true
+    if (prefersReducedMotion) {
+      video.pause()
+      return
+    }
+    video.play().catch(() => {
+      // Autoplay can still be blocked (e.g. low-power mode); the poster stays visible.
+    })
+  }, [source.src, prefersReducedMotion])
+
+  return (
+    <section className={styles.hero}>
+      <video
+        // A new key remounts the element so the browser loads the new file
+        key={source.src}
+        ref={videoRef}
+        className={styles.video}
+        poster={source.poster}
+        autoPlay={!prefersReducedMotion}
+        muted
+        loop
+        playsInline
+        preload="auto"
+        aria-label={ariaLabel}
+        aria-hidden={ariaLabel ? undefined : true}
+      >
+        <source src={source.src} type={source.type ?? 'video/mp4'} />
+      </video>
+
+      {children ? <div className={styles.content}>{children}</div> : null}
+    </section>
+  )
+}
