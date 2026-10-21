@@ -282,6 +282,25 @@ button.cartBtn:hover {
     scroll-snap-align: start;
   }
 
+  .body {
+    padding: 16px 16px 18px;
+  }
+
+  .actions {
+    gap: 8px;
+  }
+
+  .stepBtn {
+    width: 34px;
+  }
+
+  .cartBtn {
+    padding: 0 10px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+  }
+
   .dots {
     display: flex;
     justify-content: center;
