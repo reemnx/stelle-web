@@ -84,9 +84,16 @@ async function bags(name, viewport, isMobile) {
         rect: [r.x, r.y, r.width, r.height].map(Math.round),
         hit: hit ? `${hit.tagName}.${hit.className}` : null,
         wide: [...document.querySelectorAll('body *')]
-          .filter((n) => n.getBoundingClientRect().right > innerWidth + 1 && !n.closest('[class*=grid],[class*=row],[class*=track]'))
-          .slice(0, 5)
-          .map((n) => `${n.tagName}.${n.className}`),
+          .filter((n) => {
+            if (n.getBoundingClientRect().right <= 400) return false
+            for (let a = n.parentElement; a && a !== document.body; a = a.parentElement) {
+              const o = getComputedStyle(a).overflowX
+              if (o !== 'visible') return false
+            }
+            return true
+          })
+          .slice(0, 8)
+          .map((n) => `${n.tagName}.${n.className} w=${Math.round(n.getBoundingClientRect().width)} r=${Math.round(n.getBoundingClientRect().right)}`),
       }
     })
     console.log(name, 'diag', JSON.stringify(diag))
