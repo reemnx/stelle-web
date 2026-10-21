@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { BagColor } from '@/content/home'
 import styles from './BagCollection.module.css'
 
@@ -9,6 +9,24 @@ type BagCollectionProps = {
 }
 
 export function BagCollection({ title, intro, colors }: BagCollectionProps) {
+  // On phones the list becomes a swipeable carousel; track which card is in view for the dots
+  const listRef = useRef<HTMLUListElement>(null)
+  const [active, setActive] = useState(0)
+
+  const onScroll = () => {
+    const list = listRef.current
+    if (!list) return
+    const first = list.firstElementChild as HTMLElement | null
+    if (!first) return
+    const step = first.offsetWidth + parseFloat(getComputedStyle(list).columnGap || '0')
+    setActive(Math.min(colors.length - 1, Math.max(0, Math.round(list.scrollLeft / step))))
+  }
+
+  const goTo = (index: number) => {
+    const item = listRef.current?.children[index] as HTMLElement | undefined
+    item?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+  }
+
   return (
     <section id="bags" className={styles.section} aria-labelledby="bags-title">
       <div className={styles.head}>
@@ -18,13 +36,26 @@ export function BagCollection({ title, intro, colors }: BagCollectionProps) {
         <p className={styles.intro}>{intro}</p>
       </div>
 
-      <ul className={styles.grid}>
+      <ul ref={listRef} className={styles.grid} onScroll={onScroll}>
         {colors.map((color) => (
-          <li key={color.name}>
+          <li key={color.name} className={styles.item}>
             <BagCard color={color} />
           </li>
         ))}
       </ul>
+
+      <div className={styles.dots} aria-label="Choose a colour">
+        {colors.map((color, i) => (
+          <button
+            key={color.name}
+            type="button"
+            className={`${styles.dot} ${i === active ? styles.dotActive : ''}`}
+            aria-label={`Show ${color.name}`}
+            aria-current={i === active}
+            onClick={() => goTo(i)}
+          />
+        ))}
+      </div>
     </section>
   )
 }

@@ -39,6 +39,10 @@
   gap: 24px;
 }
 
+.dots {
+  display: none;
+}
+
 .card {
   display: flex;
   flex-direction: column;
@@ -107,4 +111,63 @@
     font-size: 36px;
   }
 
+  /* Swipeable carousel: one bag at a time with the next one peeking in */
+  .grid {
+    display: flex;
+    max-width: none;
+    gap: 12px;
+    margin: 0 -16px;
+    padding: 0 16px;
+    width: auto;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .item {
+    flex: 0 0 84%;
+    scroll-snap-align: start;
+  }
+
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: -12px;
+  }
+
+  .dot {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .dot::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(30, 34, 48, 0.25);
+    transition: background 0.2s ease, width 0.2s ease;
+  }
+
+  .dotActive::after {
+    width: 18px;
+    border-radius: 4px;
+    background: var(--color-ink);
+  }
 }
