@@ -73,7 +73,27 @@ async function bags(name, viewport, isMobile) {
   const press = async (loc) => {
     await loc.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'nearest' }))
     await page.waitForTimeout(300)
-    if (isMobile) await loc.tap()
+    const diag = await loc.evaluate((el) => {
+      const r = el.getBoundingClientRect()
+      const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
+      return {
+        inner: [innerWidth, innerHeight],
+        vv: [visualViewport?.width, visualViewport?.height, visualViewport?.scale],
+        docW: document.documentElement.scrollWidth,
+        scrollY,
+        rect: [r.x, r.y, r.width, r.height].map(Math.round),
+        hit: hit ? `${hit.tagName}.${hit.className}` : null,
+        wide: [...document.querySelectorAll('body *')]
+          .filter((n) => n.getBoundingClientRect().right > innerWidth + 1 && !n.closest('[class*=grid],[class*=row],[class*=track]'))
+          .slice(0, 5)
+          .map((n) => `${n.tagName}.${n.className}`),
+      }
+    })
+    console.log(name, 'diag', JSON.stringify(diag))
+    if (isMobile) await loc.tap({ timeout: 5000 }).catch(async (e) => {
+      console.log(name, 'tap failed, clicking via DOM:', String(e).split('\n')[0])
+      await loc.evaluate((el) => el.click())
+    })
     else await loc.click()
   }
   await press(section.getByRole('button', { name: 'Increase quantity' }).first())
