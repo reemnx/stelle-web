@@ -17,14 +17,18 @@ export const heroVideos: { desktop: HeroVideoSource; mobile: HeroVideoSource } =
 }
 
 export type BagColor = {
+  /** Product id, used as the cart key */
+  id: string
   name: string
   /** Shown behind the photo, and instead of it until the photo exists */
   tint: string
   /** Put the photo in public/images/bags/ and keep this path in sync */
   image: string
   alt: string
-  /** Leave empty to hide the price */
-  price: string
+  /** Price in USD */
+  price: number
+  /** Regular price shown struck through while the promotion runs; leave out to hide */
+  compareAtPrice?: number
 }
 
 /** "One bag. Three skies." section */
@@ -32,27 +36,35 @@ export const bagCollection = {
   title: 'One bag. Three skies.',
   intro:
     'Full-grain calfskin, 24 × 18 × 9 cm, a single ring handle. Each bag ships with Polaris, Vega and Comet.',
+  /** Small label on each card while the early-bird price runs; empty string hides it */
+  promoLabel: 'Early bird',
   colors: [
     {
+      id: 'bag-chocolate',
       name: 'Chocolate',
       tint: '#4A3428',
       image: '/images/bags/chocolate.jpg',
       alt: 'The STELLÉ bag in chocolate leather, empty gold eyelets ready for charms',
-      price: '',
+      price: 179,
+      compareAtPrice: 250,
     },
     {
+      id: 'bag-pistachio',
       name: 'Pistachio',
       tint: '#B9C4A0',
       image: '/images/bags/pistachio.jpg',
       alt: 'The STELLÉ bag in pistachio leather, empty gold eyelets ready for charms',
-      price: '',
+      price: 179,
+      compareAtPrice: 250,
     },
     {
+      id: 'bag-off-white',
       name: 'Off-white',
       tint: '#E4DACB',
       image: '/images/bags/off-white.jpg',
       alt: 'The STELLÉ bag in off-white leather, empty gold eyelets ready for charms',
-      price: '',
+      price: 179,
+      compareAtPrice: 250,
     },
   ] satisfies BagColor[],
 }
