@@ -39,7 +39,7 @@ const BAG_REGULAR_PRICE = 250
 export const bagCollection = {
   title: 'One bag. Three skies.',
   intro:
-    'Full-grain calfskin, 24 × 18 × 9 cm, a single ring handle. Each bag ships with Polaris, Vega and Comet.',
+    'Full-grain calfskin, 24 × 18 × 9 cm, a single ring handle. Every bag unlocks 3 pins of your choice, free.',
   /** Small label on each card while the early-bird price runs; empty string hides it */
   promoLabel: 'Early bird',
   colors: [
@@ -114,8 +114,6 @@ export const charmBuilder = {
   introTouch: 'Tap a charm to add it. On the bag, long-press a charm to move it, or tap it to take it off.',
   /** Price of each charm, in USD */
   charmPrice: 19.9,
-  /** Charms that come free with every bag */
-  includedCharms: 3,
   charms: [
     charm('polaris', 'Polaris', 'Flush', 'Eight-point star, pavé centre', 126, 130, 0.5),
     charm('luna', 'Luna', 'Flush', 'Crescent, mother-of-pearl', 100, 125, 0.5),
@@ -132,9 +130,9 @@ export const charmBuilder = {
   bagPrice: BAG_PRICE,
   bagRegularPrice: BAG_REGULAR_PRICE,
   bags: [
-    { name: 'Chocolate', swatch: '#4A3428', image: '/images/bags/chocolate.jpg' },
-    { name: 'Pistachio', swatch: '#B9C4A0', image: '/images/bags/pistachio.jpg' },
-    { name: 'Off-white', swatch: '#E4DACB', image: '/images/bags/off-white.jpg' },
+    { id: 'bag-chocolate', name: 'Chocolate', swatch: '#4A3428', image: '/images/bags/chocolate.jpg' },
+    { id: 'bag-pistachio', name: 'Pistachio', swatch: '#B9C4A0', image: '/images/bags/pistachio.jpg' },
+    { id: 'bag-off-white', name: 'Off-white', swatch: '#E4DACB', image: '/images/bags/off-white.jpg' },
   ],
   /** Bag photo size and the centre of each of the 16 eyelets on it (same on all three colours) */
   bagPhoto: { width: 1200, height: 1490 },

@@ -2,11 +2,12 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { gsap } from 'gsap'
 import type { Charm } from '@/content/home'
+import { cartPromo, FREE_PINS_PER_BAG } from '@/hooks/cartPromo'
 import { addToCart, useCart } from '@/hooks/useCart'
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery'
 import styles from './CharmBuilder.module.css'
 
-type Bag = { name: string; swatch: string; image: string }
+type Bag = { id: string; name: string; swatch: string; image: string }
 
 type CharmBuilderProps = {
   eyebrow: string
@@ -14,7 +15,6 @@ type CharmBuilderProps = {
   intro: string
   introTouch: string
   charmPrice: number
-  includedCharms: number
   bagPrice: number
   bagRegularPrice?: number
   charms: Charm[]
@@ -95,7 +95,6 @@ export function CharmBuilder({
   intro,
   introTouch,
   charmPrice,
-  includedCharms,
   bagPrice,
   bagRegularPrice,
   charms,
@@ -480,29 +479,40 @@ export function CharmBuilder({
   // Clean up a ghost if the section unmounts mid-drag
   useEffect(() => () => drag.current?.ghost?.remove(), [])
 
-  /* ----- totals ----- */
+  /* ----- totals: the pins on the bag, with the "buy a bag, get 3 pins free" promotion ----- */
   const count = placed.length
-  const extra = Math.max(0, count - includedCharms)
-  const charmsCost = extra * charmPrice
-  const total = bagPrice + charmsCost
+  const { lines } = useCart()
+  const bagIds = bags.map((b) => b.id)
+  const promo = cartPromo(lines, (l) => bagIds.includes(l.id) || l.custom?.kind === 'bag')
+  const promoOn = promo.bags > 0
+  const freeHere = Math.min(count, promo.freePinsLeft)
+  const subtotal = count * charmPrice
+  const discount = freeHere * charmPrice
+  const total = subtotal - discount
 
-  /* ----- add this exact design to the cart ----- */
-  const { qtyOf } = useCart()
-  const designId = `sky-${encodeSky(color, placed, charms)}`
-  const inCart = qtyOf(designId) > 0
-  const addDesign = () => {
-    const names = placed
-      .map((p) => charms.find((c) => c.id === p.charmId)?.name)
-      .filter(Boolean)
-      .join(', ')
-    addToCart(designId, 1, {
-      name: `${bags[color].name} bag · your sky`,
-      image: bags[color].image,
-      price: total,
-      ...(bagRegularPrice && bagRegularPrice > bagPrice ? { compareAtPrice: bagRegularPrice + charmsCost } : {}),
-      detail: names ? `Charms: ${names}` : 'No charms yet',
+  /* ----- add the pins (not the bag) to the cart ----- */
+  const addPins = () => {
+    if (!count) return
+    const perCharm = new Map<string, number>()
+    placed.forEach((p) => perCharm.set(p.charmId, (perCharm.get(p.charmId) ?? 0) + 1))
+    perCharm.forEach((qty, id) => {
+      const c = charms.find((x) => x.id === id)
+      if (!c) return
+      addToCart(`charm-${c.id}`, qty, {
+        name: `${c.name} pin`,
+        image: c.image,
+        price: charmPrice,
+        detail: c.description,
+        kind: 'charm',
+      })
     })
-    setStatus('Added to your cart.')
+    setStatus(`${count} ${count === 1 ? 'pin' : 'pins'} added to your cart.`)
+  }
+
+  /* ----- the promotion banner can add the bag shown in the builder ----- */
+  const addBag = () => {
+    addToCart(bags[color].id)
+    setStatus(`${bags[color].name} bag added. ${FREE_PINS_PER_BAG} pins are now free.`)
   }
 
   return (
@@ -638,48 +648,60 @@ export function CharmBuilder({
         </ul>
 
         <div className={styles.summary}>
-          <div className={styles.row}>
-            <span>{bags[color].name} bag</span>
-            <span className={styles.amount}>
-              {bagRegularPrice && bagRegularPrice > bagPrice && (
-                <s className={styles.was}>{usd.format(bagRegularPrice)}</s>
-              )}
-              {usd.format(bagPrice)}
-            </span>
-          </div>
+          {promoOn ? (
+            <div key="on" className={`${styles.promo} ${styles.promoOn}`} role="status">
+              <span className={styles.promoStar} aria-hidden="true">
+                <StarIcon />
+              </span>
+              <span className={styles.promoText}>
+                <strong>Promotion applies</strong>
+                <span>
+                  Your bag unlocks {FREE_PINS_PER_BAG * promo.bags} free pins
+                  {promo.freePinsLeft > 0
+                    ? ` · ${promo.freePinsLeft} still free to pick`
+                    : ' · all used'}
+                </span>
+              </span>
+            </div>
+          ) : (
+            <div key="off" className={`${styles.promo} ${styles.promoOff}`}>
+              <span className={styles.promoGift} aria-hidden="true">
+                <GiftIcon />
+              </span>
+              <span className={styles.promoText}>
+                <strong>Buy a bag, get {FREE_PINS_PER_BAG} pins free</strong>
+                <span>Add a bag to your cart and your first {FREE_PINS_PER_BAG} pins cost nothing.</span>
+              </span>
+              <button type="button" className={styles.promoBtn} onClick={addBag}>
+                Add {bags[color].name} bag · {usd.format(bagPrice)}
+                {bagRegularPrice && bagRegularPrice > bagPrice && <s>{usd.format(bagRegularPrice)}</s>}
+              </button>
+            </div>
+          )}
+
           <div className={styles.row}>
             <span>
-              {count} {count === 1 ? 'charm' : 'charms'} · {Math.min(count, includedCharms)} of {includedCharms} included
+              {count} {count === 1 ? 'pin' : 'pins'} × {usd.format(charmPrice)}
             </span>
-            <span className={styles.amount}>{extra ? `+ ${usd.format(charmsCost)}` : 'Included'}</span>
+            <span className={styles.amount}>{usd.format(subtotal)}</span>
           </div>
+          {discount > 0 && (
+            <div className={`${styles.row} ${styles.discountRow}`}>
+              <span>
+                {freeHere} free {freeHere === 1 ? 'pin' : 'pins'} with your bag
+              </span>
+              <span className={styles.amount}>−{usd.format(discount)}</span>
+            </div>
+          )}
           <div className={`${styles.row} ${styles.totalRow}`}>
-            <span>Total</span>
+            <span>Pins total</span>
             <span className={styles.amount}>{usd.format(total)}</span>
           </div>
           <div className={styles.actions}>
-            <button
-              type="button"
-              className={`${styles.primary} ${inCart ? styles.primaryAdded : ''}`}
-              onClick={addDesign}
-            >
-              {inCart ? (
-                <>
-                  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
-                    <path
-                      d="M3.5 8.5l3 3 6-7"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  In your cart · add another
-                </>
-              ) : (
-                <>Add to cart · {usd.format(total)}</>
-              )}
+            <button type="button" className={styles.primary} onClick={addPins} disabled={!count}>
+              {count
+                ? `Add ${count} ${count === 1 ? 'pin' : 'pins'} to cart · ${usd.format(total)}`
+                : 'Pick pins to add them to your cart'}
             </button>
           </div>
           <div className={styles.footer}>
@@ -693,5 +715,28 @@ export function CharmBuilder({
         </div>
       </div>
     </section>
+  )
+}
+
+function StarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <path
+        d="M12 2.5l2.2 6.6 6.8.4-5.3 4.3 1.8 6.7L12 16.7l-5.5 3.8 1.8-6.7L3 9.5l6.8-.4z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+function GiftIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round">
+        <rect x="3.5" y="9" width="17" height="11.5" rx="1.5" />
+        <path d="M2.5 9h19M12 9v11.5" />
+        <path d="M12 9c-1.5-3.5-5.5-4-5.5-1.5S10 9 12 9zm0 0c1.5-3.5 5.5-4 5.5-1.5S14 9 12 9z" />
+      </g>
+    </svg>
   )
 }

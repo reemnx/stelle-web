@@ -353,6 +353,96 @@
   background: #fffaf2;
 }
 
+.promo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(184, 148, 90, 0.55);
+  background: linear-gradient(120deg, rgba(226, 200, 146, 0.32), rgba(226, 200, 146, 0.1));
+  overflow: hidden;
+  animation: promoIn 0.6s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+
+.promo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.6) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: sweep 3.2s ease-in-out 0.5s infinite;
+  pointer-events: none;
+}
+
+.promoStar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: #e2c892;
+  font-size: 16px;
+  animation: starIn 0.8s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.promoText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  color: #5b5040;
+}
+
+.promoText strong {
+  font-size: 14px;
+  color: var(--color-ink);
+}
+
+.promoAmount {
+  font-weight: 600;
+  color: #4f7a52;
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  font-size: 13px;
+  color: #8a6a32;
+  text-decoration: none;
+}
+
+.hint:hover {
+  text-decoration: underline;
+}
+
+@keyframes promoIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  55%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes starIn {
+  from {
+    transform: rotate(-200deg) scale(0.2);
+    opacity: 0;
+  }
+}
+
 .savings,
 .total {
   margin: 0;
@@ -566,7 +656,10 @@
   }
 
   .badge,
-  .fabShown::before {
+  .fabShown::before,
+  .promo,
+  .promo::after,
+  .promoStar {
     animation: none;
   }
 }

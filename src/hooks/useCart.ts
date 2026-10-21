@@ -6,8 +6,10 @@ export type CartCustomItem = {
   image: string
   price: number
   compareAtPrice?: number
-  /** Short description shown under the name, e.g. the charms on it */
+  /** Short description shown under the name */
   detail?: string
+  /** What it is, for promotions ('charm' pins can be free with a bag) */
+  kind?: 'bag' | 'charm'
 }
 
 /** One line in the cart: a product id and how many of it (plus the item itself for custom builds) */

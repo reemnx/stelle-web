@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
+import { cartPromo, FREE_PINS_PER_BAG } from '@/hooks/cartPromo'
 import { CART_MAX_QTY, onCartAdd, removeFromCart, setCartQty, useCart } from '@/hooks/useCart'
 import styles from './CartDrawer.module.css'
 
@@ -59,7 +60,10 @@ export function CartDrawer({ products }: CartDrawerProps) {
       product: l.custom ? { id: l.id, ...l.custom } : products.find((p) => p.id === l.id),
     }))
     .filter((x): x is { line: typeof x.line; product: CartProduct } => Boolean(x.product))
-  const total = items.reduce((sum, { line, product }) => sum + line.qty * product.price, 0)
+  const subtotal = items.reduce((sum, { line, product }) => sum + line.qty * product.price, 0)
+  // Buy a bag, get 3 pins free
+  const promo = cartPromo(lines, (l) => l.custom?.kind === 'bag' || products.some((p) => p.id === l.id))
+  const total = subtotal - promo.discount
   const savings = items.reduce(
     (sum, { line, product }) =>
       sum + line.qty * Math.max(0, (product.compareAtPrice ?? product.price) - product.price),
@@ -233,6 +237,31 @@ export function CartDrawer({ products }: CartDrawerProps) {
             </ul>
 
             <div className={styles.foot}>
+              {promo.freePins > 0 && (
+                <div className={styles.promo}>
+                  <span className={styles.promoStar} aria-hidden="true">
+                    ★
+                  </span>
+                  <span className={styles.promoText}>
+                    <strong>Bag promotion applied</strong>
+                    <span>
+                      {promo.freePins} {promo.freePins === 1 ? 'pin' : 'pins'} free with your{' '}
+                      {promo.bags === 1 ? 'bag' : 'bags'}
+                    </span>
+                  </span>
+                  <span className={styles.promoAmount}>−{usd(promo.discount)}</span>
+                </div>
+              )}
+              {promo.bags > 0 && promo.freePinsLeft > 0 && (
+                <a className={styles.hint} href="#sky" onClick={() => setOpen(false)}>
+                  {promo.freePinsLeft} free {promo.freePinsLeft === 1 ? 'pin' : 'pins'} still waiting · pick them →
+                </a>
+              )}
+              {promo.bags === 0 && promo.pins > 0 && (
+                <a className={styles.hint} href="#bags" onClick={() => setOpen(false)}>
+                  Add a bag and {Math.min(promo.pins, FREE_PINS_PER_BAG)} of these pins become free →
+                </a>
+              )}
               {savings > 0 && (
                 <p className={styles.savings}>
                   <span>Early-bird savings</span>
@@ -243,7 +272,7 @@ export function CartDrawer({ products }: CartDrawerProps) {
                 <span>Total</span>
                 <span>{usd(total)}</span>
               </p>
-              <p className={styles.note}>Each bag ships with Polaris, Vega and Comet. Free shipping.</p>
+              <p className={styles.note}>Every bag unlocks {FREE_PINS_PER_BAG} pins of your choice, free.</p>
               <button type="button" className={styles.checkout}>
                 Checkout · {usd(total)}
               </button>
