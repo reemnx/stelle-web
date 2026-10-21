@@ -60,6 +60,28 @@ async function run(name, viewport, isMobile) {
   await page.close()
 }
 
+// Bag product cards: add to cart, then reload to check the cart comes back from localStorage
+async function bags(name, viewport, isMobile) {
+  const page = await browser.newPage({ viewport, isMobile, hasTouch: isMobile, deviceScaleFactor: 1 })
+  const errors = []
+  page.on('pageerror', (e) => errors.push(String(e)))
+  await page.goto(URL, { waitUntil: 'networkidle' })
+  const section = page.locator('#bags')
+  await section.scrollIntoViewIfNeeded()
+  await page.waitForTimeout(600)
+  await section.screenshot({ path: `shots/${name}-10-bags.png` })
+  await section.getByRole('button', { name: 'Increase quantity' }).first().click()
+  await section.getByRole('button', { name: 'Add to cart' }).first().click()
+  await page.reload({ waitUntil: 'networkidle' })
+  await section.scrollIntoViewIfNeeded()
+  await page.waitForTimeout(600)
+  await section.screenshot({ path: `shots/${name}-11-bags-added-after-reload.png` })
+  console.log(name, 'cart:', await page.evaluate(() => localStorage.getItem('stelle:cart:v1')), 'errors:', errors.length ? errors : 'none')
+  await page.close()
+}
+
+await bags('desktop', { width: 1440, height: 900 }, false)
+await bags('mobile', { width: 390, height: 844 }, true)
 await run('desktop', { width: 1440, height: 900 }, false)
 await run('mobile', { width: 390, height: 844 }, true)
 await browser.close()
