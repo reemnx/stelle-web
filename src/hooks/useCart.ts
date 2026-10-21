@@ -11,6 +11,15 @@ const EMPTY: CartLine[] = []
 
 let lines: CartLine[] = read()
 const listeners = new Set<() => void>()
+const addListeners = new Set<(id: string, qty: number) => void>()
+
+/** Called whenever something is added with addToCart (e.g. to open the cart) */
+export function onCartAdd(fn: (id: string, qty: number) => void) {
+  addListeners.add(fn)
+  return () => {
+    addListeners.delete(fn)
+  }
+}
 
 function read(): CartLine[] {
   try {
@@ -60,6 +69,7 @@ const clamp = (qty: number) => Math.max(0, Math.min(MAX_QTY, Math.round(qty)))
 export function addToCart(id: string, qty = 1) {
   const current = lines.find((l) => l.id === id)?.qty ?? 0
   setCartQty(id, current + qty)
+  addListeners.forEach((fn) => fn(id, qty))
 }
 
 /** Set the exact quantity of a product; 0 removes it */

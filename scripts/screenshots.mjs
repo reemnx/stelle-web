@@ -78,6 +78,11 @@ async function bags(name, viewport, isMobile) {
   }
   await press(section.getByRole('button', { name: 'Increase quantity' }).first())
   await press(section.getByRole('button', { name: 'Add to cart' }).first())
+  await page.waitForTimeout(700)
+  await page.screenshot({ path: `shots/${name}-105-auto-opened.png` })
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(600)
+  await page.screenshot({ path: `shots/${name}-106-fab.png` })
   await page.reload({ waitUntil: 'networkidle' })
   await section.evaluate((el) => el.scrollIntoView({ block: 'start' }))
   await page.waitForTimeout(600)

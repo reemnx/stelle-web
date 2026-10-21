@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { CART_MAX_QTY, removeFromCart, setCartQty, useCart } from '@/hooks/useCart'
+import { CART_MAX_QTY, onCartAdd, removeFromCart, setCartQty, useCart } from '@/hooks/useCart'
 import styles from './CartDrawer.module.css'
 
 export type CartProduct = {
@@ -34,6 +34,23 @@ export function CartDrawer({ products }: CartDrawerProps) {
   const closeRef = useRef<HTMLButtonElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
   const drag = useRef<{ startY: number; dy: number } | null>(null)
+  // Where focus was when the cart opened, so closing returns there (e.g. the card's button)
+  const opener = useRef<HTMLElement | null>(null)
+
+  const openCart = () => {
+    opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    setOpen(true)
+  }
+
+  // Adding a bag opens the cart right away
+  useEffect(
+    () =>
+      onCartAdd(() => {
+        opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+        setOpen(true)
+      }),
+    [],
+  )
 
   const items = lines
     .map((l) => ({ line: l, product: products.find((p) => p.id === l.id) }))
@@ -52,12 +69,12 @@ export function CartDrawer({ products }: CartDrawerProps) {
     document.addEventListener('keydown', onKey)
     const overflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    closeRef.current?.focus()
-    const fab = fabRef.current
+    closeRef.current?.focus({ preventScroll: true })
+    const back = opener.current ?? fabRef.current
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = overflow
-      fab?.focus()
+      back?.focus({ preventScroll: true })
     }
   }, [open])
 
@@ -90,14 +107,19 @@ export function CartDrawer({ products }: CartDrawerProps) {
         ref={fabRef}
         type="button"
         className={`${styles.fab} ${visible && !open ? styles.fabShown : ''}`}
-        onClick={() => setOpen(true)}
+        onClick={openCart}
         aria-label={`Open cart, ${count} ${count === 1 ? 'item' : 'items'}, ${usd(total)}`}
         aria-haspopup="dialog"
         aria-expanded={open}
         tabIndex={visible && !open ? 0 : -1}
       >
-        <BagIcon />
-        <span className={styles.fabTotal}>{usd(total)}</span>
+        <span className={styles.fabIcon}>
+          <BagIcon />
+        </span>
+        <span className={styles.fabText}>
+          <span className={styles.fabLabel}>View bag</span>
+          <span className={styles.fabTotal}>{usd(total)}</span>
+        </span>
         {/* re-keyed on every change so the count pops */}
         <span key={count} className={styles.badge} aria-hidden="true">
           {count}
@@ -220,7 +242,7 @@ export function CartDrawer({ products }: CartDrawerProps) {
 
 function BagIcon() {
   return (
-    <svg className={styles.icon} viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+    <svg className={styles.icon} viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
       <circle cx="12" cy="7.5" r="3.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
       <path
         d="M5 10.5h14l-1.2 9.2a1.5 1.5 0 0 1-1.5 1.3H7.7a1.5 1.5 0 0 1-1.5-1.3L5 10.5z"
