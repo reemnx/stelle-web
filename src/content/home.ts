@@ -31,6 +31,10 @@ export type BagColor = {
   compareAtPrice?: number
 }
 
+/** Early-bird bag price and the regular price shown struck through (USD) */
+const BAG_PRICE = 179
+const BAG_REGULAR_PRICE = 250
+
 /** "One bag. Three skies." section */
 export const bagCollection = {
   title: 'One bag. Three skies.',
@@ -45,8 +49,8 @@ export const bagCollection = {
       tint: '#4A3428',
       image: '/images/bags/chocolate.jpg',
       alt: 'The STELLÉ bag in chocolate leather, empty gold eyelets ready for charms',
-      price: 179,
-      compareAtPrice: 250,
+      price: BAG_PRICE,
+      compareAtPrice: BAG_REGULAR_PRICE,
     },
     {
       id: 'bag-pistachio',
@@ -54,8 +58,8 @@ export const bagCollection = {
       tint: '#B9C4A0',
       image: '/images/bags/pistachio.jpg',
       alt: 'The STELLÉ bag in pistachio leather, empty gold eyelets ready for charms',
-      price: 179,
-      compareAtPrice: 250,
+      price: BAG_PRICE,
+      compareAtPrice: BAG_REGULAR_PRICE,
     },
     {
       id: 'bag-off-white',
@@ -63,8 +67,8 @@ export const bagCollection = {
       tint: '#E4DACB',
       image: '/images/bags/off-white.jpg',
       alt: 'The STELLÉ bag in off-white leather, empty gold eyelets ready for charms',
-      price: 179,
-      compareAtPrice: 250,
+      price: BAG_PRICE,
+      compareAtPrice: BAG_REGULAR_PRICE,
     },
   ] satisfies BagColor[],
 }
@@ -124,6 +128,9 @@ export const charmBuilder = {
     charm('cle', 'Clé', 'Drop', 'Vintage key, the next chapter', 66, 243, 0.0212),
     charm('coin', 'Constellation Coin', 'Drop', 'Engraved medallion', 112, 228, 0.0226),
   ] satisfies Charm[],
+  /** Bag price in the builder (same early-bird price as the bag cards) */
+  bagPrice: BAG_PRICE,
+  bagRegularPrice: BAG_REGULAR_PRICE,
   bags: [
     { name: 'Chocolate', swatch: '#4A3428', image: '/images/bags/chocolate.jpg' },
     { name: 'Pistachio', swatch: '#B9C4A0', image: '/images/bags/pistachio.jpg' },

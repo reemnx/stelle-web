@@ -388,9 +388,62 @@
 }
 
 .primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
   background: var(--color-ivory);
   color: var(--color-ink);
-  border: 0;
+  border: 1px solid var(--color-ivory);
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.primary:hover {
+  background: #fffaf2;
+}
+
+/* this exact design is already in the cart */
+.primaryAdded {
+  background: transparent;
+  color: var(--color-ivory);
+}
+
+.primaryAdded svg {
+  color: #9fc29f;
+}
+
+.primaryAdded:hover {
+  background: rgba(243, 237, 226, 0.08);
+}
+
+.primary:focus-visible {
+  outline: 2px solid #e2c892;
+  outline-offset: 3px;
+}
+
+.amount {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.was {
+  color: #8a8fa0;
+  font-size: 13px;
+}
+
+.totalRow {
+  padding-top: 10px;
+  border-top: 1px solid #3a3f52;
+  font-size: 17px;
+  font-weight: 600;
 }
 
 .secondary {

@@ -284,6 +284,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+.detail {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #4a4e5b;
+}
+
 .unit {
   display: flex;
   gap: 8px;

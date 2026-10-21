@@ -1,7 +1,24 @@
 import { useSyncExternalStore } from 'react'
 
-/** One line in the cart: a product id and how many of it */
-export type CartLine = { id: string; qty: number }
+/** A one-off item built on the site (e.g. a bag with its charms), stored with the line itself */
+export type CartCustomItem = {
+  name: string
+  image: string
+  price: number
+  compareAtPrice?: number
+  /** Short description shown under the name, e.g. the charms on it */
+  detail?: string
+}
+
+/** One line in the cart: a product id and how many of it (plus the item itself for custom builds) */
+export type CartLine = { id: string; qty: number; custom?: CartCustomItem }
+
+const isCustom = (c: unknown): c is CartCustomItem =>
+  !!c &&
+  typeof c === 'object' &&
+  typeof (c as CartCustomItem).name === 'string' &&
+  typeof (c as CartCustomItem).image === 'string' &&
+  typeof (c as CartCustomItem).price === 'number'
 
 const STORAGE_KEY = 'stelle:cart:v1'
 const MAX_QTY = 10
@@ -31,7 +48,11 @@ function read(): CartLine[] {
         (l): l is CartLine =>
           typeof l?.id === 'string' && Number.isInteger(l?.qty) && l.qty > 0,
       )
-      .map((l) => ({ id: l.id, qty: Math.min(l.qty, MAX_QTY) }))
+      .map((l) => ({
+        id: l.id,
+        qty: Math.min(l.qty, MAX_QTY),
+        ...(isCustom(l.custom) ? { custom: l.custom } : {}),
+      }))
   } catch {
     return []
   }
@@ -65,18 +86,27 @@ function subscribe(onChange: () => void) {
 
 const clamp = (qty: number) => Math.max(0, Math.min(MAX_QTY, Math.round(qty)))
 
-/** Add qty of a product (adds to what is already there) */
-export function addToCart(id: string, qty = 1) {
-  const current = lines.find((l) => l.id === id)?.qty ?? 0
-  setCartQty(id, current + qty)
+/** Add qty of a product (adds to what is already there). Pass `custom` for a one-off build */
+export function addToCart(id: string, qty = 1, custom?: CartCustomItem) {
+  const existing = lines.find((l) => l.id === id)
+  writeLine(id, (existing?.qty ?? 0) + qty, custom ?? existing?.custom)
   addListeners.forEach((fn) => fn(id, qty))
 }
 
 /** Set the exact quantity of a product; 0 removes it */
 export function setCartQty(id: string, qty: number) {
+  writeLine(id, qty, lines.find((l) => l.id === id)?.custom)
+}
+
+function writeLine(id: string, qty: number, custom?: CartCustomItem) {
   const q = clamp(qty)
-  const rest = lines.filter((l) => l.id !== id)
-  write(q > 0 ? [...rest, { id, qty: q }] : rest)
+  const index = lines.findIndex((l) => l.id === id)
+  const next = lines.filter((l) => l.id !== id)
+  if (q > 0) {
+    // keep the line where it was so the cart list doesn't reshuffle
+    next.splice(index < 0 ? next.length : index, 0, { id, qty: q, ...(custom ? { custom } : {}) })
+  }
+  write(next)
 }
 
 export function removeFromCart(id: string) {

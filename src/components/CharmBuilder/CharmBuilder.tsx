@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { gsap } from 'gsap'
 import type { Charm } from '@/content/home'
+import { addToCart, useCart } from '@/hooks/useCart'
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery'
 import styles from './CharmBuilder.module.css'
 
@@ -14,6 +15,8 @@ type CharmBuilderProps = {
   introTouch: string
   charmPrice: number
   includedCharms: number
+  bagPrice: number
+  bagRegularPrice?: number
   charms: Charm[]
   bags: Bag[]
   bagPhoto: { width: number; height: number }
@@ -93,6 +96,8 @@ export function CharmBuilder({
   introTouch,
   charmPrice,
   includedCharms,
+  bagPrice,
+  bagRegularPrice,
   charms,
   bags,
   bagPhoto,
@@ -475,25 +480,30 @@ export function CharmBuilder({
   // Clean up a ghost if the section unmounts mid-drag
   useEffect(() => () => drag.current?.ghost?.remove(), [])
 
-  /* ----- share ----- */
-  const share = async () => {
-    const url = `${window.location.origin}${window.location.pathname}#sky=${encodeSky(color, placed, charms)}`
-    const text = `My STELLÉ constellation: ${bags[color].name} bag with ${placed.length} ${placed.length === 1 ? 'charm' : 'charms'}.`
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'My STELLÉ constellation', text, url })
-        return
-      }
-      await navigator.clipboard.writeText(url)
-      setStatus('Link copied. Anyone who opens it sees your exact bag.')
-    } catch {
-      // Share sheet closed or clipboard blocked: nothing to do
-    }
-  }
-
   /* ----- totals ----- */
   const count = placed.length
   const extra = Math.max(0, count - includedCharms)
+  const charmsCost = extra * charmPrice
+  const total = bagPrice + charmsCost
+
+  /* ----- add this exact design to the cart ----- */
+  const { qtyOf } = useCart()
+  const designId = `sky-${encodeSky(color, placed, charms)}`
+  const inCart = qtyOf(designId) > 0
+  const addDesign = () => {
+    const names = placed
+      .map((p) => charms.find((c) => c.id === p.charmId)?.name)
+      .filter(Boolean)
+      .join(', ')
+    addToCart(designId, 1, {
+      name: `${bags[color].name} bag · your sky`,
+      image: bags[color].image,
+      price: total,
+      ...(bagRegularPrice && bagRegularPrice > bagPrice ? { compareAtPrice: bagRegularPrice + charmsCost } : {}),
+      detail: names ? `Charms: ${names}` : 'No charms yet',
+    })
+    setStatus('Added to your cart.')
+  }
 
   return (
     <section id="sky" ref={sectionRef} className={styles.section} aria-labelledby="builder-title">
@@ -630,20 +640,46 @@ export function CharmBuilder({
         <div className={styles.summary}>
           <div className={styles.row}>
             <span>{bags[color].name} bag</span>
-            <span>{count} / {eyelets.length} eyelets</span>
+            <span className={styles.amount}>
+              {bagRegularPrice && bagRegularPrice > bagPrice && (
+                <s className={styles.was}>{usd.format(bagRegularPrice)}</s>
+              )}
+              {usd.format(bagPrice)}
+            </span>
           </div>
           <div className={styles.row}>
             <span>
               {count} {count === 1 ? 'charm' : 'charms'} · {Math.min(count, includedCharms)} of {includedCharms} included
             </span>
-            <span>{extra ? `+ ${usd.format(extra * charmPrice)}` : 'Included'}</span>
+            <span className={styles.amount}>{extra ? `+ ${usd.format(charmsCost)}` : 'Included'}</span>
+          </div>
+          <div className={`${styles.row} ${styles.totalRow}`}>
+            <span>Total</span>
+            <span className={styles.amount}>{usd.format(total)}</span>
           </div>
           <div className={styles.actions}>
-            <button type="button" className={styles.primary} onClick={() => setStatus('Pre-sale opens soon. Your design is saved on this device.')}>
-              Reserve this bag
-            </button>
-            <button type="button" className={styles.secondary} onClick={share} disabled={!count}>
-              Share my sky
+            <button
+              type="button"
+              className={`${styles.primary} ${inCart ? styles.primaryAdded : ''}`}
+              onClick={addDesign}
+            >
+              {inCart ? (
+                <>
+                  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                    <path
+                      d="M3.5 8.5l3 3 6-7"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  In your cart · add another
+                </>
+              ) : (
+                <>Add to cart · {usd.format(total)}</>
+              )}
             </button>
           </div>
           <div className={styles.footer}>

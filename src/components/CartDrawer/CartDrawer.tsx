@@ -9,6 +9,7 @@ export type CartProduct = {
   image: string
   price: number
   compareAtPrice?: number
+  detail?: string
 }
 
 type CartDrawerProps = {
@@ -53,7 +54,10 @@ export function CartDrawer({ products }: CartDrawerProps) {
   )
 
   const items = lines
-    .map((l) => ({ line: l, product: products.find((p) => p.id === l.id) }))
+    .map((l) => ({
+      line: l,
+      product: l.custom ? { id: l.id, ...l.custom } : products.find((p) => p.id === l.id),
+    }))
     .filter((x): x is { line: typeof x.line; product: CartProduct } => Boolean(x.product))
   const total = items.reduce((sum, { line, product }) => sum + line.qty * product.price, 0)
   const savings = items.reduce(
@@ -193,6 +197,7 @@ export function CartDrawer({ products }: CartDrawerProps) {
                       <span className={styles.name}>{product.name}</span>
                       <span className={styles.lineTotal}>{usd(line.qty * product.price)}</span>
                     </div>
+                    {product.detail && <span className={styles.detail}>{product.detail}</span>}
                     <span className={styles.unit}>
                       {usd(product.price)}
                       {product.compareAtPrice && product.compareAtPrice > product.price && (
