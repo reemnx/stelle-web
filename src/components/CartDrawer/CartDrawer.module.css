@@ -103,6 +103,10 @@
   font-variant-numeric: tabular-nums;
 }
 
+.fabCta {
+  display: none;
+}
+
 .badge {
   position: absolute;
   top: 6px;
@@ -422,12 +426,40 @@
 /* ============ Phones: bottom sheet ============ */
 
 @media (max-width: 767px) {
+  /* Full-width bar stuck to the bottom of the screen */
   .fab {
-    right: 16px;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    height: 64px;
-    padding: 0 22px 0 9px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: calc(68px + env(safe-area-inset-bottom, 0px));
+    padding: 0 16px env(safe-area-inset-bottom, 0px) 12px;
     gap: 12px;
+    border: 0;
+    border-top: 1px solid rgba(226, 200, 146, 0.4);
+    border-radius: 0;
+    box-shadow: 0 -12px 30px -12px rgba(30, 34, 48, 0.45);
+    transform: translateY(100%);
+  }
+
+  .fabShown {
+    transform: none;
+  }
+
+  .fabShown:hover {
+    transform: none;
+  }
+
+  /* the breathing ring becomes a gold shimmer line along the top edge */
+  .fabShown::before {
+    inset: -1px 0 auto;
+    height: 2px;
+    border-radius: 0;
+    box-shadow: none;
+    background: linear-gradient(90deg, transparent, #e2c892, transparent);
+    background-size: 40% 100%;
+    background-repeat: no-repeat;
+    animation: shimmer 2.8s ease-in-out infinite;
   }
 
   .fabIcon {
@@ -436,12 +468,27 @@
   }
 
   .badge {
-    top: 4px;
-    left: 38px;
+    top: 6px;
+    left: 46px;
   }
 
   .fabTotal {
     font-size: 18px;
+  }
+
+  .fabCta {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: #e2c892;
+    color: var(--color-ink);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .panel {
@@ -488,6 +535,15 @@
   .foot {
     padding-left: 16px;
     padding-right: 16px;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -60% 0;
+  }
+  100% {
+    background-position: 160% 0;
   }
 }
 

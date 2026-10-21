@@ -43,3 +43,10 @@ video {
   display: block;
   max-width: 100%;
 }
+
+/* Phones: room at the bottom for the full-width cart bar */
+@media (max-width: 767px) {
+  html.has-cart-bar body {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+}

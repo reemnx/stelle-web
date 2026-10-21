@@ -101,6 +101,12 @@ export function CartDrawer({ products }: CartDrawerProps) {
 
   const visible = count > 0 || open
 
+  // While the bar is on screen, pad the page bottom (phones) so it never hides content
+  useEffect(() => {
+    document.documentElement.classList.toggle('has-cart-bar', count > 0)
+    return () => document.documentElement.classList.remove('has-cart-bar')
+  }, [count])
+
   return createPortal(
     <>
       <button
@@ -119,6 +125,11 @@ export function CartDrawer({ products }: CartDrawerProps) {
         <span className={styles.fabText}>
           <span className={styles.fabLabel}>View bag</span>
           <span className={styles.fabTotal}>{usd(total)}</span>
+        </span>
+        {/* phones only: the full-width bar gets an explicit call to action */}
+        <span className={styles.fabCta} aria-hidden="true">
+          {count} {count === 1 ? 'item' : 'items'}
+          <ArrowIcon />
         </span>
         {/* re-keyed on every change so the count pops */}
         <span key={count} className={styles.badge} aria-hidden="true">
@@ -249,6 +260,21 @@ function BagIcon() {
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function ArrowIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path
+        d="M5 12h14M13 6l6 6-6 6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>
