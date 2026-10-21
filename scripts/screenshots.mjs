@@ -82,6 +82,13 @@ async function bags(name, viewport, isMobile) {
   await section.evaluate((el) => el.scrollIntoView({ block: 'start' }))
   await page.waitForTimeout(600)
   await page.screenshot({ path: `shots/${name}-11-bags-added-after-reload.png` })
+  // floating cart button → side panel (desktop) / bottom sheet (mobile)
+  const fab = page.getByRole('button', { name: /^Open cart/ })
+  await fab.click({ timeout: 5000 }).catch(() => fab.evaluate((el) => el.click()))
+  await page.waitForTimeout(700)
+  await page.screenshot({ path: `shots/${name}-12-cart-open.png` })
+  await page.keyboard.press('Escape')
+  await page.waitForTimeout(600)
   console.log(name, 'cart:', await page.evaluate(() => localStorage.getItem('stelle:cart:v1')), 'errors:', errors.length ? errors : 'none')
   await page.close()
 }
