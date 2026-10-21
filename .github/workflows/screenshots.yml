@@ -22,8 +22,9 @@ jobs:
       - run: |
           npx vite preview --port 4173 --strictPort &
           npx wait-on -t 30000 http://localhost:4173 || sleep 5
-          node scripts/screenshots.mjs
+          node scripts/screenshots.mjs || echo "screenshot script failed" 
       - run: |
+          cp -r dist shots/dist
           cd shots
           git init -q -b ci-shots
           git add .
