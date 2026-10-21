@@ -56,6 +56,14 @@ async function run(name, viewport, isMobile) {
   await page.waitForTimeout(900)
   await page.screenshot({ path: `shots/${name}-04-pistachio.png` })
   await page.screenshot({ path: `shots/${name}-05-full.png`, fullPage: true })
+  // one button adds the whole design (bag + charms) to the cart, which opens
+  const addDesign = page.getByRole('button', { name: /^Add to cart ·/ })
+  await addDesign.evaluate((el) => el.scrollIntoView({ block: 'center' }))
+  await page.waitForTimeout(300)
+  await page.screenshot({ path: `shots/${name}-06-summary.png` })
+  await addDesign.click({ timeout: 5000 }).catch(() => addDesign.evaluate((el) => el.click()))
+  await page.waitForTimeout(800)
+  await page.screenshot({ path: `shots/${name}-07-design-in-cart.png` })
   console.log(name, 'errors:', errors.length ? errors : 'none')
   await page.close()
 }
