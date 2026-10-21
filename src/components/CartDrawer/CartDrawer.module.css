@@ -468,8 +468,12 @@
   }
 
   .badge {
-    top: 6px;
-    left: 46px;
+    top: 8px;
+    left: 40px;
+  }
+
+  .fabText {
+    margin-left: 6px;
   }
 
   .fabTotal {
