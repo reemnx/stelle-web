@@ -73,7 +73,8 @@ async function bags(name, viewport, isMobile) {
   const press = async (loc) => {
     await loc.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'nearest' }))
     await page.waitForTimeout(300)
-    await loc.click()
+    // Mobile emulation can mis-map pointer coordinates here; fall back to a DOM click
+    await loc.click({ timeout: 5000 }).catch(() => loc.evaluate((el) => el.click()))
   }
   await press(section.getByRole('button', { name: 'Increase quantity' }).first())
   await press(section.getByRole('button', { name: 'Add to cart' }).first())
