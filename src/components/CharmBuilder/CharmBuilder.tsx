@@ -81,7 +81,8 @@ function readSavedSky(charms: Charm[], eyeletCount: number, bagCount: number) {
   try {
     const fromLink = window.location.hash.match(/sky=([\d._-]+)/)?.[1]
     const raw = fromLink ?? window.localStorage.getItem(STORAGE_KEY)
-    return raw ? { ...decodeSky(raw, charms, eyeletCount, bagCount), fromLink: !!fromLink } : null
+    const sky = raw ? decodeSky(raw, charms, eyeletCount, bagCount) : null
+    return sky ? { ...sky, fromLink: !!fromLink } : null
   } catch {
     return null
   }
