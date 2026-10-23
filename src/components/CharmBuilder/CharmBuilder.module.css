@@ -49,9 +49,10 @@
 
 .layer {
   position: absolute;
-  width: 131.6%;
-  left: -15.8%;
-  top: -10.26%;
+  /* bag centred on the card with some air around it */
+  width: 118%;
+  left: -9.8%;
+  top: -3.5%;
   transform-origin: 50% 55%;
 }
 
