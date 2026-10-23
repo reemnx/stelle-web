@@ -9,7 +9,7 @@
 /* ============ Stage ============ */
 
 .stageCol {
-  background: #ead9c6; /* matches the studio backdrop of the bag photos */
+  background: #ead9c6;
   padding: 48px 40px;
   display: flex;
   flex-direction: column;
@@ -24,9 +24,11 @@
 }
 
 /*
- * The stage shows a crop of the bag photo (the bag, not the empty backdrop):
+ * The stage shows a crop of the bag photo (the bag, not the empty frame around it):
  * 76% of its width and 78% of its height. The inner layer is the full photo,
  * scaled up and shifted so that crop fills the stage.
+ * The photo is a transparent cut-out, so the stage is a soft raised card and the
+ * bag sits on it with its own shadow.
  */
 .stage {
   position: relative;
@@ -35,6 +37,14 @@
   aspect-ratio: 0.785;
   overflow: hidden;
   flex: none;
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 80% at 50% 35%, rgba(255, 250, 242, 0.9), rgba(255, 250, 242, 0) 70%),
+    linear-gradient(180deg, #f4e8da 0%, #ecdcc8 100%);
+  box-shadow:
+    0 1px 2px rgba(74, 52, 40, 0.08),
+    0 24px 50px -24px rgba(74, 52, 40, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .layer {
@@ -51,6 +61,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* soft contact shadow under the bag, light from above */
+  filter: drop-shadow(0 22px 18px rgba(60, 40, 25, 0.22)) drop-shadow(0 4px 4px rgba(60, 40, 25, 0.12));
   opacity: 0;
   transition: opacity 0.6s ease;
   user-select: none;

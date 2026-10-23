@@ -130,11 +130,12 @@ export const charmBuilder = {
   bagPrice: BAG_PRICE,
   bagRegularPrice: BAG_REGULAR_PRICE,
   bags: [
-    { id: 'bag-chocolate', name: 'Chocolate', swatch: '#4A3428', image: '/images/bags/chocolate.jpg' },
-    { id: 'bag-pistachio', name: 'Pistachio', swatch: '#B9C4A0', image: '/images/bags/pistachio.jpg' },
-    { id: 'bag-off-white', name: 'Off-white', swatch: '#E4DACB', image: '/images/bags/off-white.jpg' },
+    { id: 'bag-chocolate', name: 'Chocolate', swatch: '#4A3428', image: '/images/bags/cutout/chocolate.webp' },
+    { id: 'bag-pistachio', name: 'Pistachio', swatch: '#B9C4A0', image: '/images/bags/cutout/pistachio.webp' },
+    { id: 'bag-off-white', name: 'Off-white', swatch: '#E4DACB', image: '/images/bags/cutout/off-white.webp' },
   ],
   /** Bag photo size and the centre of each of the 16 eyelets on it (same on all three colours) */
+  /** Transparent cut-outs of the bag photos (same 1200 × 1490 frame, so the eyelet points still match) */
   bagPhoto: { width: 1200, height: 1490 },
   eyelets: [
     [296, 628], [929, 630],
