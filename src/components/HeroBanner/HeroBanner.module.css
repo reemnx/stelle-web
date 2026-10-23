@@ -1,9 +1,9 @@
 .hero {
   position: relative;
   width: 100%;
-  /* Desktop: 70% of the viewport height */
-  height: 70vh;
-  height: 70svh;
+  /* Desktop: 82% of the viewport height */
+  height: 82vh;
+  height: 82svh;
   min-height: 320px;
   overflow: hidden;
   background: var(--color-ink);

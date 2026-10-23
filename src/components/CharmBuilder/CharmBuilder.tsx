@@ -112,7 +112,7 @@ export function CharmBuilder({
   const [movingFrom, setMovingFrom] = useState<number | null>(null)
   const [status, setStatus] = useState('')
 
-  const sectionRef = useRef<HTMLElement>(null)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const layerRef = useRef<HTMLDivElement>(null)
   const cardRefs = useRef(new Map<string, HTMLButtonElement>())
   const pieceRefs = useRef(new Map<number, HTMLImageElement>())
@@ -516,201 +516,220 @@ export function CharmBuilder({
   }
 
   return (
-    <section id="sky" ref={sectionRef} className={styles.section} aria-labelledby="builder-title">
-      {/* ===== Stage: the real bag photo with charms on its eyelets ===== */}
-      <div className={styles.stageCol}>
-        <div className={styles.stage}>
-          <div
-            ref={layerRef}
-            className={`${styles.layer} ${dragging ? styles.isDragging : ''}`}
-            style={{ aspectRatio: `${bagPhoto.width} / ${bagPhoto.height}` } as CSSProperties}
-          >
-            {bags.map((b, i) => (
-              <img
-                key={b.name}
-                className={`${styles.bagPhoto} ${i === color ? styles.bagActive : ''}`}
-                src={b.image}
-                alt={i === color ? `${b.name} STELLÉ bag` : ''}
-                aria-hidden={i === color ? undefined : true}
-                width={bagPhoto.width}
-                height={bagPhoto.height}
-                draggable={false}
-              />
-            ))}
-
-            {/* eyelet hotspots: glow while dragging, sparkle when a charm lands */}
-            {eyelets.map(([x, y], i) => (
-              <span
-                key={i}
-                aria-hidden="true"
-                className={`${styles.hotspot} ${!taken.has(i) || movingFrom === i ? styles.hotspotFree : ''} ${dropTarget === i ? styles.hotspotTarget : ''}`}
-                style={{ left: `${(x / bagPhoto.width) * 100}%`, top: `${(y / bagPhoto.height) * 100}%` }}
-              >
-                <span className={styles.spark} data-spark={i} />
-              </span>
-            ))}
-
-            {placed.map((p) => {
-              const c = charmById.get(p.charmId)
-              if (!c) return null
-              const [x, y] = eyelets[p.eyelet]
-              return (
-                <button
-                  key={p.eyelet}
-                  type="button"
-                  className={`${styles.piece} ${c.kind === 'Drop' ? styles.pieceDrop : ''}`}
-                  style={{
-                    left: `${(x / bagPhoto.width) * 100}%`,
-                    top: `${(y / bagPhoto.height) * 100}%`,
-                    width: `${(c.onBag.w / bagPhoto.width) * 100}%`,
-                    transform: `translate(${-c.onBag.anchorX * 100}%, ${-c.onBag.anchorY * 100}%)`,
-                  }}
-                  onClick={() => removeAt(p.eyelet)}
-                  onPointerDown={(e) => startDrag(e, c, p.eyelet)}
-                  onContextMenu={(e) => e.preventDefault()}
-                  aria-label={`${c.name} on eyelet ${p.eyelet + 1}. Press to remove; long-press and drag to move.`}
-                >
-                  <img
-                    ref={(el) => {
-                      if (el) pieceRefs.current.set(p.eyelet, el)
-                      else pieceRefs.current.delete(p.eyelet)
-                    }}
-                    className={styles.pieceImg}
-                    src={c.cutout}
-                    alt=""
-                    draggable={false}
-                    style={{ transformOrigin: `${c.onBag.anchorX * 100}% ${c.onBag.anchorY * 100}%` }}
-                  />
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        <div className={styles.swatches} role="radiogroup" aria-label="Bag colour">
-          {bags.map((b, i) => (
-            <button
-              key={b.name}
-              type="button"
-              role="radio"
-              aria-checked={i === color}
-              className={`${styles.swatch} ${i === color ? styles.swatchOn : ''}`}
-              onClick={() => pickColor(i)}
-            >
-              <span className={styles.swatchDot} style={{ background: b.swatch }} />
-              {b.name}
-            </button>
-          ))}
-        </div>
+    <section id="sky" className={styles.section} aria-labelledby="builder-title">
+      {/* ===== Heading: on the page background, outside the dark builder (same style as #MyStelle) ===== */}
+      <div className={styles.head}>
+        <p className={styles.eyebrow}>{eyebrow}</p>
+        <h2 id="builder-title" className={styles.title}>
+          {title}
+        </h2>
+        <p className={styles.intro}>
+          <span className={styles.introPointer}>{intro}</span>
+          <span className={styles.introTouch}>{introTouch}</span>
+        </p>
       </div>
 
-      {/* ===== Panel: the charm grid + summary ===== */}
-      <div className={styles.panel}>
-        <div className={styles.head}>
-          <p className={styles.eyebrow}>{eyebrow}</p>
-          <h2 id="builder-title" className={styles.title}>
-            {title}
-          </h2>
-          <p className={styles.intro}>
-            <span className={styles.introPointer}>{intro}</span>
-            <span className={styles.introTouch}>{introTouch}</span>
-          </p>
+      <div ref={sectionRef} className={styles.builder}>
+        {/* ===== Stage: the real bag photo with charms on its eyelets ===== */}
+        <div className={styles.stageCol}>
+          <div className={styles.stage}>
+            <div
+              ref={layerRef}
+              className={`${styles.layer} ${dragging ? styles.isDragging : ''}`}
+              style={{ aspectRatio: `${bagPhoto.width} / ${bagPhoto.height}` } as CSSProperties}
+            >
+              {bags.map((b, i) => (
+                <img
+                  key={b.name}
+                  className={`${styles.bagPhoto} ${i === color ? styles.bagActive : ''}`}
+                  src={b.image}
+                  alt={i === color ? `${b.name} STELLÉ bag` : ''}
+                  aria-hidden={i === color ? undefined : true}
+                  width={bagPhoto.width}
+                  height={bagPhoto.height}
+                  draggable={false}
+                />
+              ))}
+
+              {/* eyelet hotspots: glow while dragging, sparkle when a charm lands */}
+              {eyelets.map(([x, y], i) => (
+                <span
+                  key={i}
+                  aria-hidden="true"
+                  className={`${styles.hotspot} ${!taken.has(i) || movingFrom === i ? styles.hotspotFree : ''} ${dropTarget === i ? styles.hotspotTarget : ''}`}
+                  style={{ left: `${(x / bagPhoto.width) * 100}%`, top: `${(y / bagPhoto.height) * 100}%` }}
+                >
+                  <span className={styles.spark} data-spark={i} />
+                </span>
+              ))}
+
+              {placed.map((p) => {
+                const c = charmById.get(p.charmId)
+                if (!c) return null
+                const [x, y] = eyelets[p.eyelet]
+                return (
+                  <button
+                    key={p.eyelet}
+                    type="button"
+                    className={`${styles.piece} ${c.kind === 'Drop' ? styles.pieceDrop : ''}`}
+                    style={{
+                      left: `${(x / bagPhoto.width) * 100}%`,
+                      top: `${(y / bagPhoto.height) * 100}%`,
+                      width: `${(c.onBag.w / bagPhoto.width) * 100}%`,
+                      transform: `translate(${-c.onBag.anchorX * 100}%, ${-c.onBag.anchorY * 100}%)`,
+                    }}
+                    onClick={() => removeAt(p.eyelet)}
+                    onPointerDown={(e) => startDrag(e, c, p.eyelet)}
+                    onContextMenu={(e) => e.preventDefault()}
+                    aria-label={`${c.name} on eyelet ${p.eyelet + 1}. Press to remove; long-press and drag to move.`}
+                  >
+                    <img
+                      ref={(el) => {
+                        if (el) pieceRefs.current.set(p.eyelet, el)
+                        else pieceRefs.current.delete(p.eyelet)
+                      }}
+                      className={styles.pieceImg}
+                      src={c.cutout}
+                      alt=""
+                      draggable={false}
+                      style={{ transformOrigin: `${c.onBag.anchorX * 100}% ${c.onBag.anchorY * 100}%` }}
+                    />
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div className={styles.swatches} role="radiogroup" aria-label="Bag colour">
+            {bags.map((b, i) => (
+              <button
+                key={b.name}
+                type="button"
+                role="radio"
+                aria-checked={i === color}
+                className={`${styles.swatch} ${i === color ? styles.swatchOn : ''}`}
+                onClick={() => pickColor(i)}
+              >
+                <span className={styles.swatchDot} style={{ background: b.swatch }} />
+                {b.name}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <ul className={styles.grid}>
-          {charms.map((c) => (
-            <li key={c.id}>
-              <button
-                ref={(el) => {
-                  if (el) cardRefs.current.set(c.id, el)
-                  else cardRefs.current.delete(c.id)
-                }}
-                type="button"
-                className={styles.card}
-                onClick={() => addCharm(c)}
-                onPointerDown={(e) => startDrag(e, c, null)}
-                aria-label={`Add ${c.name}, ${usd.format(charmPrice)}`}
-              >
-                <span className={styles.media}>
-                  <img className={styles.image} src={c.image} alt="" width={640} height={800} loading="lazy" decoding="async" draggable={false} />
-                  <span className={styles.plus} aria-hidden="true">
-                    +
+        {/* ===== Panel: the charm grid + summary ===== */}
+        <div className={styles.panel}>
+          <ul className={styles.grid}>
+            {charms.map((c) => {
+              // Eyelets this charm is on, oldest first; Remove takes off the most recent one
+              const onBag = placed.filter((p) => p.charmId === c.id)
+              const lastEyelet = onBag.length ? onBag[onBag.length - 1].eyelet : null
+              return (
+                <li key={c.id} className={onBag.length ? styles.slotOn : undefined}>
+                  <button
+                    ref={(el) => {
+                      if (el) cardRefs.current.set(c.id, el)
+                      else cardRefs.current.delete(c.id)
+                    }}
+                    type="button"
+                    className={styles.card}
+                    onClick={() => addCharm(c)}
+                    onPointerDown={(e) => startDrag(e, c, null)}
+                    aria-label={`Add ${c.name}, ${usd.format(charmPrice)}`}
+                  >
+                    <span className={styles.media}>
+                      <img className={styles.image} src={c.image} alt="" width={640} height={800} loading="lazy" decoding="async" draggable={false} />
+                      <span className={styles.plus} aria-hidden="true">
+                        +
+                      </span>
+                    </span>
+                    <span className={styles.meta}>
+                      <span className={styles.name}>{c.name}</span>
+                      <span className={styles.price}>{usd.format(charmPrice)}</span>
+                    </span>
+                    <span className={styles.kind}>{c.kind}</span>
+                  </button>
+                  {lastEyelet !== null ? (
+                    <button
+                      type="button"
+                      className={styles.remove}
+                      onClick={() => removeAt(lastEyelet)}
+                      aria-label={`Remove ${c.name} from the bag${onBag.length > 1 ? ` (${onBag.length} on the bag)` : ''}`}
+                    >
+                      <span aria-hidden="true">×</span> Remove
+                      {onBag.length > 1 ? <span className={styles.removeCount}>{onBag.length}</span> : null}
+                    </button>
+                  ) : null}
+                </li>
+              )
+            })}
+          </ul>
+
+          <div className={styles.summary}>
+            {promoOn ? (
+              <div key="on" className={`${styles.promo} ${styles.promoOn}`} role="status">
+                <span className={styles.promoStar} aria-hidden="true">
+                  <StarIcon />
+                </span>
+                <span className={styles.promoText}>
+                  <strong>Promotion applies</strong>
+                  <span>
+                    Your bag unlocks {FREE_PINS_PER_BAG * promo.bags} free pins
+                    {promo.freePinsLeft > 0
+                      ? ` · ${promo.freePinsLeft} still free to pick`
+                      : ' · all used'}
                   </span>
                 </span>
-                <span className={styles.meta}>
-                  <span className={styles.name}>{c.name}</span>
-                  <span className={styles.price}>{usd.format(charmPrice)}</span>
+              </div>
+            ) : (
+              <div key="off" className={`${styles.promo} ${styles.promoOff}`}>
+                <span className={styles.promoGift} aria-hidden="true">
+                  <GiftIcon />
                 </span>
-                <span className={styles.kind}>{c.kind}</span>
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <div className={styles.summary}>
-          {promoOn ? (
-            <div key="on" className={`${styles.promo} ${styles.promoOn}`} role="status">
-              <span className={styles.promoStar} aria-hidden="true">
-                <StarIcon />
-              </span>
-              <span className={styles.promoText}>
-                <strong>Promotion applies</strong>
-                <span>
-                  Your bag unlocks {FREE_PINS_PER_BAG * promo.bags} free pins
-                  {promo.freePinsLeft > 0
-                    ? ` · ${promo.freePinsLeft} still free to pick`
-                    : ' · all used'}
+                <span className={styles.promoText}>
+                  <strong>Buy a bag, get {FREE_PINS_PER_BAG} pins free</strong>
+                  <span>Add a bag to your cart and your first {FREE_PINS_PER_BAG} pins cost nothing.</span>
                 </span>
-              </span>
-            </div>
-          ) : (
-            <div key="off" className={`${styles.promo} ${styles.promoOff}`}>
-              <span className={styles.promoGift} aria-hidden="true">
-                <GiftIcon />
-              </span>
-              <span className={styles.promoText}>
-                <strong>Buy a bag, get {FREE_PINS_PER_BAG} pins free</strong>
-                <span>Add a bag to your cart and your first {FREE_PINS_PER_BAG} pins cost nothing.</span>
-              </span>
-              <button type="button" className={styles.promoBtn} onClick={addBag}>
-                Add {bags[color].name} bag · {usd.format(bagPrice)}
-                {bagRegularPrice && bagRegularPrice > bagPrice && <s>{usd.format(bagRegularPrice)}</s>}
-              </button>
-            </div>
-          )}
+                <button type="button" className={styles.promoBtn} onClick={addBag}>
+                  Add {bags[color].name} bag · {usd.format(bagPrice)}
+                  {bagRegularPrice && bagRegularPrice > bagPrice && <s>{usd.format(bagRegularPrice)}</s>}
+                </button>
+              </div>
+            )}
 
-          <div className={styles.row}>
-            <span>
-              {count} {count === 1 ? 'pin' : 'pins'} × {usd.format(charmPrice)}
-            </span>
-            <span className={styles.amount}>{usd.format(subtotal)}</span>
-          </div>
-          {discount > 0 && (
-            <div className={`${styles.row} ${styles.discountRow}`}>
+            <div className={styles.row}>
               <span>
-                {freeHere} free {freeHere === 1 ? 'pin' : 'pins'} with your bag
+                {count} {count === 1 ? 'pin' : 'pins'} × {usd.format(charmPrice)}
               </span>
-              <span className={styles.amount}>−{usd.format(discount)}</span>
+              <span className={styles.amount}>{usd.format(subtotal)}</span>
             </div>
-          )}
-          <div className={`${styles.row} ${styles.totalRow}`}>
-            <span>Pins total</span>
-            <span className={styles.amount}>{usd.format(total)}</span>
-          </div>
-          <div className={styles.actions}>
-            <button type="button" className={styles.primary} onClick={addPins} disabled={!count}>
-              {count
-                ? `Add ${count} ${count === 1 ? 'pin' : 'pins'} to cart · ${usd.format(total)}`
-                : 'Pick pins to add them to your cart'}
-            </button>
-          </div>
-          <div className={styles.footer}>
-            <button type="button" className={styles.clear} onClick={clearAll} disabled={!count}>
-              Clear all charms
-            </button>
-            <p className={styles.status} role="status" aria-live="polite">
-              {status}
-            </p>
+            {discount > 0 && (
+              <div className={`${styles.row} ${styles.discountRow}`}>
+                <span>
+                  {freeHere} free {freeHere === 1 ? 'pin' : 'pins'} with your bag
+                </span>
+                <span className={styles.amount}>−{usd.format(discount)}</span>
+              </div>
+            )}
+            <div className={`${styles.row} ${styles.totalRow}`}>
+              <span>Pins total</span>
+              <span className={styles.amount}>{usd.format(total)}</span>
+            </div>
+            <div className={styles.actions}>
+              <button type="button" className={styles.primary} onClick={addPins} disabled={!count}>
+                {count
+                  ? `Add ${count} ${count === 1 ? 'pin' : 'pins'} to cart · ${usd.format(total)}`
+                  : 'Pick pins to add them to your cart'}
+              </button>
+            </div>
+            <div className={styles.footer}>
+              <button type="button" className={styles.clear} onClick={clearAll} disabled={!count}>
+                Clear all charms
+              </button>
+              <p className={styles.status} role="status" aria-live="polite">
+                {status}
+              </p>
+            </div>
           </div>
         </div>
       </div>
