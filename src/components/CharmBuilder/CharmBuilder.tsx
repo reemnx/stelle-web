@@ -3,7 +3,7 @@ import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react'
 import { gsap } from 'gsap'
 import type { Charm } from '@/content/home'
 import { cartPromo, FREE_PINS_PER_BAG } from '@/hooks/cartPromo'
-import { addToCart, useCart } from '@/hooks/useCart'
+import { addToCart, cartQtyOf, setCartQty, useCart } from '@/hooks/useCart'
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery'
 import styles from './CharmBuilder.module.css'
 
@@ -81,7 +81,7 @@ function readSavedSky(charms: Charm[], eyeletCount: number, bagCount: number) {
   try {
     const fromLink = window.location.hash.match(/sky=([\d._-]+)/)?.[1]
     const raw = fromLink ?? window.localStorage.getItem(STORAGE_KEY)
-    return raw ? decodeSky(raw, charms, eyeletCount, bagCount) : null
+    return raw ? { ...decodeSky(raw, charms, eyeletCount, bagCount), fromLink: !!fromLink } : null
   } catch {
     return null
   }
@@ -127,16 +127,46 @@ export function CharmBuilder({
 
   const charmById = useMemo(() => new Map(charms.map((c) => [c.id, c])), [charms])
   const taken = useMemo(() => new Set(placed.map((p) => p.eyelet)), [placed])
+  /** Latest placed list, for handlers that run after an animation */
+  const placedRef = useRef(placed)
+  placedRef.current = placed
+
+  /* ----- every pin on the bag is a pin in the cart ----- */
+  const pinToCart = useCallback(
+    (charmId: string) => {
+      const c = charmById.get(charmId)
+      if (!c) return
+      addToCart(
+        `charm-${c.id}`,
+        1,
+        { name: `${c.name} pin`, image: c.image, price: charmPrice, detail: c.description, kind: 'charm' },
+        { silent: true },
+      )
+    },
+    [charmById, charmPrice],
+  )
+  const pinFromCart = (charmId: string, qty = 1) => {
+    const id = `charm-${charmId}`
+    setCartQty(id, cartQtyOf(id) - qty)
+  }
 
   /* ----- restore a shared link or the last design on this device ----- */
   useEffect(() => {
     const saved = readSavedSky(charms, eyelets.length, bags.length)
     if (saved) {
+      // A shared link puts its pins in the cart; a design saved on this device is already there
+      if (saved.fromLink) {
+        const want = new Map<string, number>()
+        saved.placed.forEach((p) => want.set(p.charmId, (want.get(p.charmId) ?? 0) + 1))
+        want.forEach((n, id) => {
+          for (let i = cartQtyOf(`charm-${id}`); i < n; i++) pinToCart(id)
+        })
+      }
       setColor(saved.color)
       setPlaced(saved.placed)
     }
     loaded.current = true
-  }, [charms, eyelets.length, bags.length])
+  }, [charms, eyelets.length, bags.length, pinToCart])
 
   useEffect(() => {
     if (!loaded.current) return
@@ -199,11 +229,17 @@ export function CharmBuilder({
   }, [reducedMotion])
 
   /* ----- place / remove ----- */
-  const commit = useCallback((charmId: string, eyelet: number) => {
-    reserved.current.delete(eyelet)
-    justPlaced.current = eyelet
-    setPlaced((prev) => (prev.some((p) => p.eyelet === eyelet) ? prev : [...prev, { eyelet, charmId }]))
-  }, [])
+  const commit = useCallback(
+    (charmId: string, eyelet: number) => {
+      reserved.current.delete(eyelet)
+      if (placedRef.current.some((p) => p.eyelet === eyelet)) return
+      justPlaced.current = eyelet
+      placedRef.current = [...placedRef.current, { eyelet, charmId }]
+      setPlaced(placedRef.current)
+      pinToCart(charmId)
+    },
+    [pinToCart],
+  )
 
   const makeGhost = (charm: Charm, x: number, y: number, width: number) => {
     const g = document.createElement('img')
@@ -246,18 +282,22 @@ export function CharmBuilder({
       setStatus('All 16 eyelets are full. Tap a charm on the bag to take it off.')
       return
     }
-    setStatus(`${charm.name} added.`)
+    setStatus(`${charm.name} added to your cart.`)
     flyTo(charm, eyelet, cardRefs.current.get(charm.id)?.getBoundingClientRect() ?? null)
   }
 
   const removeAt = (eyelet: number) => {
     if (clickSuppressed() || removing.current.has(eyelet)) return
     const el = pieceRefs.current.get(eyelet)
-    const name = charmById.get(placed.find((p) => p.eyelet === eyelet)?.charmId ?? '')?.name
+    const charmId = placed.find((p) => p.eyelet === eyelet)?.charmId
+    const name = charmById.get(charmId ?? '')?.name
     const drop = () => {
       removing.current.delete(eyelet)
-      setPlaced((prev) => prev.filter((p) => p.eyelet !== eyelet))
-      if (name) setStatus(`${name} removed.`)
+      if (!placedRef.current.some((p) => p.eyelet === eyelet)) return
+      placedRef.current = placedRef.current.filter((p) => p.eyelet !== eyelet)
+      setPlaced(placedRef.current)
+      if (charmId) pinFromCart(charmId)
+      if (name) setStatus(`${name} removed from your cart.`)
     }
     if (!el || reducedMotion) return drop()
     removing.current.add(eyelet)
@@ -269,8 +309,12 @@ export function CharmBuilder({
     if (!placed.length) return
     const els = placed.map((p) => pieceRefs.current.get(p.eyelet)).filter(Boolean) as HTMLImageElement[]
     const done = () => {
+      const perCharm = new Map<string, number>()
+      placedRef.current.forEach((p) => perCharm.set(p.charmId, (perCharm.get(p.charmId) ?? 0) + 1))
+      perCharm.forEach((qty, id) => pinFromCart(id, qty))
+      placedRef.current = []
       setPlaced([])
-      setStatus('All charms cleared.')
+      setStatus('All charms cleared from the bag and your cart.')
     }
     if (reducedMotion || !els.length) return done()
     gsap.to(els, { y: -30, opacity: 0, rotation: 120, scale: 0.7, duration: 0.35, stagger: 0.04, ease: 'power2.in', onComplete: done })
@@ -421,7 +465,7 @@ export function CharmBuilder({
           onComplete: () => {
             ghost.remove()
             if (d.from === null) {
-              setStatus(`${d.charm.name} added.`)
+              setStatus(`${d.charm.name} added to your cart.`)
               commit(d.charm.id, target)
             } else if (target === d.from) {
               showPieceAgain() // put back where it was
@@ -490,24 +534,22 @@ export function CharmBuilder({
   const discount = freeHere * charmPrice
   const total = subtotal - discount
 
-  /* ----- add the pins (not the bag) to the cart ----- */
-  const addPins = () => {
-    if (!count) return
-    const perCharm = new Map<string, number>()
-    placed.forEach((p) => perCharm.set(p.charmId, (perCharm.get(p.charmId) ?? 0) + 1))
-    perCharm.forEach((qty, id) => {
-      const c = charms.find((x) => x.id === id)
-      if (!c) return
-      addToCart(`charm-${c.id}`, qty, {
-        name: `${c.name} pin`,
-        image: c.image,
-        price: charmPrice,
-        detail: c.description,
-        kind: 'charm',
-      })
-    })
-    setStatus(`${count} ${count === 1 ? 'pin' : 'pins'} added to your cart.`)
-  }
+  /* ----- pins taken out in the cart come off the bag too (newest first) ----- */
+  useEffect(() => {
+    const qty = (id: string) => lines.find((l) => l.id === `charm-${id}`)?.qty ?? 0
+    const seen = new Map<string, number>()
+    const keep: Placed[] = []
+    // walk newest → oldest so the oldest pins are the ones kept
+    for (const p of [...placed].reverse()) {
+      const n = (seen.get(p.charmId) ?? 0) + 1
+      seen.set(p.charmId, n)
+      if (n <= qty(p.charmId)) keep.unshift(p)
+    }
+    if (keep.length !== placed.length) {
+      placedRef.current = keep
+      setPlaced(keep)
+    }
+  }, [lines, placed])
 
   /* ----- the promotion banner can add the bag shown in the builder ----- */
   const addBag = () => {
@@ -712,15 +754,8 @@ export function CharmBuilder({
               </div>
             )}
             <div className={`${styles.row} ${styles.totalRow}`}>
-              <span>Pins total</span>
+              <span>Pins in your cart</span>
               <span className={styles.amount}>{usd.format(total)}</span>
-            </div>
-            <div className={styles.actions}>
-              <button type="button" className={styles.primary} onClick={addPins} disabled={!count}>
-                {count
-                  ? `Add ${count} ${count === 1 ? 'pin' : 'pins'} to cart · ${usd.format(total)}`
-                  : 'Pick pins to add them to your cart'}
-              </button>
             </div>
             <div className={styles.footer}>
               <button type="button" className={styles.clear} onClick={clearAll} disabled={!count}>

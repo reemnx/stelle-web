@@ -88,11 +88,20 @@ function subscribe(onChange: () => void) {
 
 const clamp = (qty: number) => Math.max(0, Math.min(MAX_QTY, Math.round(qty)))
 
-/** Add qty of a product (adds to what is already there). Pass `custom` for a one-off build */
-export function addToCart(id: string, qty = 1, custom?: CartCustomItem) {
+/**
+ * Add qty of a product (adds to what is already there). Pass `custom` for a one-off build.
+ * `silent` skips the onCartAdd listeners (so the cart doesn't pop open), e.g. for pins
+ * that go into the cart as they are put on the bag.
+ */
+export function addToCart(id: string, qty = 1, custom?: CartCustomItem, { silent = false } = {}) {
   const existing = lines.find((l) => l.id === id)
   writeLine(id, (existing?.qty ?? 0) + qty, custom ?? existing?.custom)
-  addListeners.forEach((fn) => fn(id, qty))
+  if (!silent) addListeners.forEach((fn) => fn(id, qty))
+}
+
+/** Current quantity of a product, read outside React */
+export function cartQtyOf(id: string) {
+  return lines.find((l) => l.id === id)?.qty ?? 0
 }
 
 /** Set the exact quantity of a product; 0 removes it */
