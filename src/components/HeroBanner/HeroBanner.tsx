@@ -3,7 +3,7 @@ import { useMediaQuery, usePrefersReducedMotion } from '@/hooks/useMediaQuery'
 import styles from './HeroBanner.module.css'
 
 export type HeroVideoSource = {
-  /** Video file URL, e.g. "/videos/hero-fw26-desktop.mp4" */
+  /** Video file URL, e.g. "/videos/hero-desktop.mp4" */
   src: string
   /** Optional MIME type (currently unused; the browser detects it) */
   type?: string

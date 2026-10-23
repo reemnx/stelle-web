@@ -3,12 +3,12 @@ import type { HeroVideoSource } from '@/components/HeroBanner'
 /**
  * Homepage content. Swap the demo videos for the real STELLÉ hero films by
  * putting the files in public/videos/ and pointing to them, e.g.
- *   src: '/videos/hero-fw26-desktop.mp4'
+ *   src: '/videos/hero-desktop.mp4'
  */
 export const heroVideos: { desktop: HeroVideoSource; mobile: HeroVideoSource } = {
   // "Day to night" FW26-style edit, 16:9 (480p preview; swap for the 1080p finalize later)
   desktop: {
-    src: '/videos/hero-fw26-desktop.mp4',
+    src: '/videos/hero-desktop.mp4',
   },
   // Same edit, 9:16
   mobile: {
