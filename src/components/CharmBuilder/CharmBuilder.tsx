@@ -530,7 +530,8 @@ export function CharmBuilder({
   const bagIds = bags.map((b) => b.id)
   const promo = cartPromo(lines, (l) => bagIds.includes(l.id) || l.custom?.kind === 'bag')
   const promoOn = promo.bags > 0
-  const freeHere = Math.min(count, promo.freePinsLeft)
+  // the pins on the bag are already in the cart, so the free ones are the ones the promotion covers
+  const freeHere = Math.min(count, promo.freePins)
   const subtotal = count * charmPrice
   const discount = freeHere * charmPrice
   const total = subtotal - discount
