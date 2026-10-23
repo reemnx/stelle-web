@@ -8,11 +8,11 @@ import type { HeroVideoSource } from '@/components/HeroBanner'
 export const heroVideos: { desktop: HeroVideoSource; mobile: HeroVideoSource } = {
   // "Day to night" FW26-style edit, 16:9 (480p preview; swap for the 1080p finalize later)
   desktop: {
-    src: '/videos/hero-fw26-desktop.mp4',
+    src: '/videos/hero-desktop.mp4',
   },
   // Same edit, 9:16
   mobile: {
-    src: '/videos/hero-fw26-mobile.mp4',
+    src: '/videos/hero-mobile.mp4',
   },
 }
 
