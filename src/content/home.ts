@@ -108,7 +108,7 @@ const charm = (
 /** Constellation Builder: the First Light charms + the bag they go on */
 export const charmBuilder = {
   eyebrow: 'First Light · 10 charms',
-  title: 'Build your constellation',
+  title: '#MyConstellation',
   /** Desktop (mouse) and touch-screen versions of the how-to line */
   intro: 'Click a charm to add it, or drag it onto any eyelet. On the bag, drag a charm to move it or click it to take it off.',
   introTouch: 'Tap a charm to add it. On the bag, long-press a charm to move it, or tap it to take it off.',
