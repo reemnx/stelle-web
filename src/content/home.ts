@@ -183,6 +183,10 @@ export const socialGallery = {
       photo('g03-stacked-trio', false, 'Chocolate, pistachio and off-white bags stacked into a tower', 'The trio'),
       photo('g04-stone-steps', true, 'The pistachio bag on stone steps beside sunglasses and earphones', 'Stone steps · Pistachio'),
       photo('g05-under-arm', false, 'The off-white bag tucked under the arm with a leopard skirt', 'Under the arm · Off-white'),
+      photo('g12-cafe-chair', true, 'A ringed hand grabs the chocolate bag on an orange café chair beside a croissant and a red camera', 'Café chair · Chocolate'),
+      photo('g11-archway', false, 'A woman in a mint hoodie lifts the pistachio bag by its ring handle in front of a stone archway', 'The archway · Pistachio'),
+      photo('g14-stairs', true, 'Climbing dark wooden stairs in white slingbacks with the chocolate bag', 'On the stairs · Chocolate'),
+      photo('g17-green-juice', false, 'Bending for a green juice with the chocolate bag on her arm, white socks and ballet flats', 'Green juice · Chocolate'),
     ],
     [
       photo('g06-leather-gloves', true, 'Cognac leather opera gloves lift the pistachio bag', 'Leather gloves · Pistachio'),
@@ -190,6 +194,9 @@ export const socialGallery = {
       photo('g08-macro-pin', true, 'Close-up of the Polaris charm being screwed into an off-white bag', 'Polaris, up close'),
       photo('g09-alley-steps', false, 'A woman walks down old alley steps carrying the pistachio bag', 'Alley steps · Pistachio'),
       photo('g10-rooftop-night', true, 'The off-white bag beside a glass of wine on a rooftop at night', 'Rooftop night · Off-white'),
+      photo('g13-velvet-sofa', false, 'A woman rests on a green velvet sofa holding the off-white bag', 'Velvet sofa · Off-white'),
+      photo('g16-crosswalk', true, 'Burgundy tights and pointed heels on a crosswalk, the pistachio bag held in front with a newspaper', 'Crosswalk · Pistachio'),
+      photo('g15-trench-loafers', false, 'Trench coat and leopard loafers, the off-white bag held low with both hands', 'Trench & leopard · Off-white'),
     ],
   ] satisfies GalleryPhoto[][],
 }
