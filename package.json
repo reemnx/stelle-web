@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
-    "test:leads": "node scripts/test-leads.mjs"
+    "test:leads": "node scripts/test-leads.mjs",
+    "fix:lockfile": "node scripts/fix-lockfile.mjs"
   },
   "dependencies": {
     "gsap": "^3.12.5",

@@ -4,7 +4,7 @@ React 19 + TypeScript + Vite, routing with React Router.
 
 ## Requirements
 
-- Node.js 20.19 or newer (`node -v` to check)..
+- Node.js 20.19 or newer (`node -v` to check)
 
 ## Getting started
 
@@ -15,6 +15,29 @@ npm run dev
 
 The site opens at http://localhost:5173.
 
+### Installing from a work computer (private npm registry)
+
+CI and Cloudflare Pages install with `npm ci` from the public registry, so
+`package-lock.json` must only point at `https://registry.npmjs.org/`. If your
+computer is set up to use a company registry (Artifactory, Nexus, etc.), a plain
+`npm install <package>` writes that company URL into the lockfile and the deploy
+fails, because Cloudflare can't reach it.
+
+When adding packages on such a computer, point npm at the public registry for
+this repo only:
+
+```bash
+npm install <package> --registry=https://registry.npmjs.org/
+```
+
+If the lockfile already has company URLs, fix them and commit:
+
+```bash
+npm run fix:lockfile
+```
+
+CI checks this before installing and fails with a clear message if it finds any.
+
 ## Scripts
 
 | Command | What it does |
@@ -24,6 +47,7 @@ The site opens at http://localhost:5173.
 | `npm run preview` | Serve the production build locally |
 | `npm run lint` | Run ESLint |
 | `npm run typecheck` | Type-check only |
+| `npm run fix:lockfile` | Point every package in `package-lock.json` back to the public npm registry |
 
 ## Structure
 
