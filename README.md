@@ -4,7 +4,7 @@ React 19 + TypeScript + Vite, routing with React Router.
 
 ## Requirements
 
-- Node.js 20.19 or newer (`node -v` to check)
+- Node.js 20.19 or newer (`node -v` to check)..
 
 ## Getting started
 
