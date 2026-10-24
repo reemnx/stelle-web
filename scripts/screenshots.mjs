@@ -71,7 +71,7 @@ async function run(name, viewport, isMobile) {
   await page.keyboard.press('Escape')
   await page.waitForTimeout(700)
   // pins go into the cart as they are put on the bag (no separate add button)
-  const summary = page.getByText('Pins in your cart')
+  const summary = sky.getByText('Promotion applies')
   await summary.evaluate((el) => el.scrollIntoView({ block: 'center' }))
   await page.waitForTimeout(900)
   await page.screenshot({ path: `shots/${name}-07-promo-on.png` })

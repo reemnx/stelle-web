@@ -1,8 +1,11 @@
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { cartPromo, FREE_PINS_PER_BAG } from '@/hooks/cartPromo'
 import { CART_MAX_QTY, onCartAdd, removeFromCart, setCartQty, useCart } from '@/hooks/useCart'
 import styles from './CartDrawer.module.css'
+
+// Load phone metadata only when checkout is opened.
+const CheckoutModal = lazy(() => import('@/components/CheckoutModal/CheckoutModal').then((module) => ({ default: module.CheckoutModal })))
 
 export type CartProduct = {
   id: string
@@ -32,8 +35,10 @@ const usd = (n: number) =>
 export function CartDrawer({ products }: CartDrawerProps) {
   const { lines, count } = useCart()
   const [open, setOpen] = useState(false)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
   const fabRef = useRef<HTMLButtonElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
+  const checkoutRef = useRef<HTMLButtonElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
   const drag = useRef<{ startY: number; dy: number } | null>(null)
   // Where focus was when the cart opened, so closing returns there (e.g. the card's button)
@@ -273,13 +278,21 @@ export function CartDrawer({ products }: CartDrawerProps) {
                 <span>{usd(total)}</span>
               </p>
               <p className={styles.note}>Every bag unlocks {FREE_PINS_PER_BAG} pins of your choice, free.</p>
-              <button type="button" className={styles.checkout}>
+              <button ref={checkoutRef} type="button" className={styles.checkout} onClick={() => setCheckoutOpen(true)} aria-haspopup="dialog">
                 Checkout · {usd(total)}
               </button>
             </div>
           </>
         )}
       </div>
+      {open && checkoutOpen && (
+        <Suspense fallback={null}>
+          <CheckoutModal onClose={() => {
+            setCheckoutOpen(false)
+            checkoutRef.current?.focus({ preventScroll: true })
+          }} />
+        </Suspense>
+      )}
     </>,
     document.body,
   )

@@ -306,21 +306,6 @@ export function CharmBuilder({
     gsap.to(el, { rotation: 200, y: -40, scale: 0.6, opacity: 0, duration: 0.45, ease: 'power2.in', onComplete: drop })
   }
 
-  const clearAll = () => {
-    if (!placed.length) return
-    const els = placed.map((p) => pieceRefs.current.get(p.eyelet)).filter(Boolean) as HTMLImageElement[]
-    const done = () => {
-      const perCharm = new Map<string, number>()
-      placedRef.current.forEach((p) => perCharm.set(p.charmId, (perCharm.get(p.charmId) ?? 0) + 1))
-      perCharm.forEach((qty, id) => pinFromCart(id, qty))
-      placedRef.current = []
-      setPlaced([])
-      setStatus('All charms cleared from the bag and your cart.')
-    }
-    if (reducedMotion || !els.length) return done()
-    gsap.to(els, { y: -30, opacity: 0, rotation: 120, scale: 0.7, duration: 0.35, stagger: 0.04, ease: 'power2.in', onComplete: done })
-  }
-
   const pickColor = (i: number) => {
     if (i === color) return
     setColor(i)
@@ -524,18 +509,11 @@ export function CharmBuilder({
   // Clean up a ghost if the section unmounts mid-drag
   useEffect(() => () => drag.current?.ghost?.remove(), [])
 
-  /* ----- totals: the pins on the bag, with the "buy a bag, get 3 pins free" promotion ----- */
-  const count = placed.length
+  /* ----- cart promotion ----- */
   const { lines } = useCart()
   const bagIds = bags.map((b) => b.id)
   const promo = cartPromo(lines, (l) => bagIds.includes(l.id) || l.custom?.kind === 'bag')
   const promoOn = promo.bags > 0
-  // the pins on the bag are already in the cart, so the free ones are the ones the promotion covers
-  const freeHere = Math.min(count, promo.freePins)
-  const subtotal = count * charmPrice
-  const discount = freeHere * charmPrice
-  const total = subtotal - discount
-
   /* ----- pins taken out in the cart come off the bag too (newest first) ----- */
   useEffect(() => {
     const qty = (id: string) => lines.find((l) => l.id === `charm-${id}`)?.qty ?? 0
@@ -661,7 +639,7 @@ export function CharmBuilder({
           </div>
         </div>
 
-        {/* ===== Panel: the charm grid + summary ===== */}
+        {/* ===== Panel: the charm grid + bag offer ===== */}
         <div className={styles.panel}>
           <ul className={styles.grid}>
             {charms.map((c) => {
@@ -741,32 +719,9 @@ export function CharmBuilder({
               </div>
             )}
 
-            <div className={styles.row}>
-              <span>
-                {count} {count === 1 ? 'pin' : 'pins'} × {usd.format(charmPrice)}
-              </span>
-              <span className={styles.amount}>{usd.format(subtotal)}</span>
-            </div>
-            {discount > 0 && (
-              <div className={`${styles.row} ${styles.discountRow}`}>
-                <span>
-                  {freeHere} free {freeHere === 1 ? 'pin' : 'pins'} with your bag
-                </span>
-                <span className={styles.amount}>−{usd.format(discount)}</span>
-              </div>
-            )}
-            <div className={`${styles.row} ${styles.totalRow}`}>
-              <span>Pins in your cart</span>
-              <span className={styles.amount}>{usd.format(total)}</span>
-            </div>
-            <div className={styles.footer}>
-              <button type="button" className={styles.clear} onClick={clearAll} disabled={!count}>
-                Clear all charms
-              </button>
-              <p className={styles.status} role="status" aria-live="polite">
-                {status}
-              </p>
-            </div>
+            <p className={styles.status} role="status" aria-live="polite">
+              {status}
+            </p>
           </div>
         </div>
       </div>

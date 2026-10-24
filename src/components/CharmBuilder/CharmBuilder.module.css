@@ -437,20 +437,13 @@
   }
 }
 
-/* Summary */
+/* Bag offer below the charms */
 .summary {
   border-top: 1px solid #3a3f52;
   padding-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 14px;
 }
 
 .actions {
@@ -495,23 +488,6 @@
 .primary:focus-visible {
   outline: 2px solid #e2c892;
   outline-offset: 3px;
-}
-
-.amount {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-.was {
-  color: #8a8fa0;
-  font-size: 13px;
-}
-
-.discountRow {
-  color: #a9d3a6;
 }
 
 /* ===== "Buy a bag, get 3 pins free" banner ===== */
@@ -689,49 +665,28 @@
   cursor: default;
 }
 
-.totalRow {
-  padding-top: 10px;
-  border-top: 1px solid #3a3f52;
-  font-size: 17px;
-  font-weight: 600;
-}
-
 .secondary {
   background: transparent;
   color: var(--color-ivory);
   border: 1px solid var(--color-ivory);
 }
 
-.secondary:disabled,
-.clear:disabled {
+.secondary:disabled {
   opacity: 0.4;
   cursor: default;
 }
 
-.footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  min-height: 24px;
-}
-
-.clear {
-  background: none;
-  border: 0;
-  padding: 6px 0;
-  color: #aeb2bf;
-  font: inherit;
-  font-size: 13px;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
+/* Keep action feedback available to screen readers without adding a footer. */
 .status {
-  margin: 0;
-  font-size: 13px;
-  color: #e2c892;
-  text-align: right;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -756,7 +711,7 @@
 /* ============ Tablet & mobile: bag on top (sticky), charms below ============ */
 
 @media (max-width: 1023px) {
-  /* Order: sticky bag → charms → total (the heading sits above the dark block). The panel's children join the builder grid. */
+  /* Order: sticky bag → charms → bag offer (the heading sits above the dark block). The panel's children join the builder grid. */
   .builder {
     grid-template-columns: 1fr;
   }
@@ -805,7 +760,7 @@
   }
 }
 
-/* Phones: the charms become one swipeable tray, so bag + charms + total fit on one screen */
+/* Phones: the charms become one swipeable tray, so bag + charms + bag offer fit on one screen */
 @media (max-width: 767px) {
   /* Heading matches the #MyStelle gallery heading on phones */
   .section {
@@ -839,6 +794,41 @@
   .grid > li {
     flex: 0 0 31%;
     scroll-snap-align: start;
+  }
+
+  .summary {
+    margin: 10px 16px 16px;
+    padding-top: 10px;
+    gap: 0;
+  }
+
+  .promo {
+    padding: 10px 12px;
+    gap: 4px 10px;
+  }
+
+  .promoGift,
+  .promoStar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .promoText strong {
+    font-size: 13px;
+  }
+
+  .promoText {
+    font-size: 12px;
+  }
+
+  .promoOff .promoText > span {
+    display: none;
+  }
+
+  .promoBtn {
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+    font-size: 12px;
   }
 
   .name {
