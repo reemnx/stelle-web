@@ -16,6 +16,8 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
   const [notice, setNotice] = useState('')
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
+  /** Email the shopper left, shown back to them in the sold-out message */
+  const [sentTo, setSentTo] = useState('')
   const submitting = useRef(false)
   const successRef = useRef<HTMLDivElement>(null)
   const [country, setCountry] = useState<Country>(browserCountry)
@@ -67,6 +69,7 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
         setNotice(result.error || 'We couldn’t send your request. Please try again.')
         return
       }
+      setSentTo(lead.email)
       setSent(true)
     } catch {
       setNotice('We couldn’t confirm your request. Please check your connection and try again.')
@@ -100,17 +103,30 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
             <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
         </button>
-        <span className={styles.emblem} aria-hidden="true">✧</span>
-        <h2 id="checkout-title">Make it yours.</h2>
-        <p id="checkout-description">Leave your details to take the next step.</p>
+        {!sent && <span className={styles.emblem} aria-hidden="true">✧</span>}
+        {sent ? (
+          <>
+            <span className={styles.soldBadge}>Sold out</span>
+            <h2 id="checkout-title">Every star is taken.</h2>
+            <p id="checkout-description">This first drop has sold out, but your place in line is saved.</p>
+          </>
+        ) : (
+          <>
+            <h2 id="checkout-title">Make it yours.</h2>
+            <p id="checkout-description">Leave your details to take the next step.</p>
+          </>
+        )}
       </header>
 
       {sent ? (
         <div className={styles.success} ref={successRef} tabIndex={-1}>
-          <span className={styles.successMark} aria-hidden="true">✓</span>
-          <p role="status">Your request has been sent.</p>
-          <span>Thank you. We’ll be in touch soon.</span>
-          <button type="button" className={styles.submit} onClick={dismiss}>Done</button>
+          <span className={styles.successMark} aria-hidden="true">✧</span>
+          <p role="status">You’re on the list.</p>
+          <span>
+            We’ll email you at <strong className={styles.sentTo}>{sentTo}</strong> the moment STELLÉ is back in stock,
+            before anyone else hears about it.
+          </span>
+          <button type="button" className={styles.submit} onClick={dismiss}>Back to the site</button>
         </div>
       ) : (
       <form aria-busy={sending} autoComplete="off" className={styles.form} onSubmit={submit} onChange={() => setNotice('')}>
@@ -174,6 +190,10 @@ export function CheckoutModal({ onClose }: CheckoutModalProps) {
           <span>Email <span className={styles.required} aria-hidden="true">*</span></span>
           <input disabled={sending} name="email" type="email" autoComplete="off" placeholder="you@example.com" required maxLength={254} />
         </label>
+
+        <p className={styles.consent}>
+          By submitting, you agree to receive emails and marketing updates from STELLÉ. You can unsubscribe at any time.
+        </p>
 
         <button type="submit" disabled={sending} className={styles.submit}>{sending ? 'Sending…' : 'Submit'} <span aria-hidden="true">✧</span></button>
         {notice && <p className={styles.notice} role="alert">{notice}</p>}
